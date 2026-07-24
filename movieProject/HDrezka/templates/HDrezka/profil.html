@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+<h2>{% block title %} Profile {% endblock %}</h2>
+
+{% if user.is_authenticated %}
+
+<p class="mt-5">Имя пользователя: {{ user.username }}</p>
+<p class="mt-2">Имя: {{ user.first_name }}</p>
+<p class="mt-2">Фамилия: {{ user.last_name }}</p>
+<p class="mt-2">Email: {{ user.email }}</p>
+
+{% else %}
+
+<a href="/login/">Авторизуйтесь чтоб зайти в свой профиль </a>
+
+{% endif %}
+
+{% endblock %}

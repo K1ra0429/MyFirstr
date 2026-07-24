@@ -1,0 +1,13 @@
+{% load qb_tags %}
+{% get_categories as categories %}
+
+
+<div class="list_categories d-flex flex-column gap-2">
+    <a href="{% url 'main' %}" class="btn btn-dark w-100">Все</a>
+
+    {% for cat in categories %}
+    <a href="{{ cat.get_absolute_url }}" class="btn btn-dark w-100">{{ cat.title }}</a>
+    {% endfor %}
+
+</div>
+

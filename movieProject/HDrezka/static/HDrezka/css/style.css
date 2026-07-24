@@ -1,0 +1,475 @@
+/* =====================================================================
+   HDrezka — минималистичная кинематографичная тема
+   Палитра: тёплый почти-чёрный + приглушённое золото (свет киноафиши)
+   Шрифты: Playfair Display (заголовки/бренд) + Inter (текст)
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --bg:            #0b0b0d;
+    --bg-elevated:   #121214;
+    --bg-card:       #17171a;
+    --border:        #232327;
+    --border-soft:   #1c1c20;
+    --text:          #ededee;
+    --text-muted:    #8c8c93;
+    --text-faint:    #57575d;
+
+    --gold:          #c9a24a;
+    --gold-soft:     rgba(201, 162, 74, 0.14);
+    --gold-border:   rgba(201, 162, 74, 0.35);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    --font-display: "Playfair Display", Georgia, serif;
+    --font-body: "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    background: var(--bg) !important;
+}
+
+body {
+    color: var(--text);
+    font-family: var(--font-body);
+    letter-spacing: 0.1px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: 0.2px;
+}
+
+::selection {
+    background: var(--gold-soft);
+    color: var(--text);
+}
+
+/* ---------- Навигация ---------- */
+.navbar {
+    background: var(--bg) !important;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.navbar .container {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.navbar-brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem !important;
+    color: var(--text) !important;
+    position: relative;
+}
+
+.navbar-brand::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 28px;
+    height: 2px;
+    background: var(--gold);
+}
+
+.navbar .nav-link {
+    color: var(--text-muted) !important;
+    font-size: 0.92rem;
+    transition: color 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--text) !important;
+}
+
+.dropdown-menu {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px;
+    margin-top: 10px !important;
+}
+
+.dropdown-item {
+    color: var(--text-muted) !important;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background: var(--gold-soft) !important;
+    color: var(--text) !important;
+}
+
+.navbar form .form-control {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    font-size: 0.9rem;
+}
+
+.navbar form .form-control:focus {
+    border-color: var(--gold-border);
+    box-shadow: none;
+}
+
+.navbar form .form-control::placeholder {
+    color: var(--text-faint);
+}
+
+.navbar .btn-outline-success {
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--bg-elevated);
+}
+
+.navbar .btn-outline-success:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #0b0b0d;
+}
+
+/* ---------- Кнопки ---------- */
+.btn {
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 0.92rem;
+}
+
+.btn-success {
+    background: var(--gold);
+    border: 1px solid var(--gold);
+    color: #0b0b0d;
+}
+
+.btn-success:hover {
+    background: #d8b25f;
+    border-color: #d8b25f;
+    color: #0b0b0d;
+}
+
+.btn-primary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.btn-primary:hover {
+    border-color: var(--gold-border);
+    color: var(--text);
+    background: var(--gold-soft);
+}
+
+/* ---------- Карточки фильмов ---------- */
+.card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.list_games .card:hover,
+.list_movies .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold-border) !important;
+}
+
+.card-img-top {
+    object-fit: cover;
+    width: 100%;
+    height: 320px;
+}
+
+.card-body {
+    padding: 14px 16px 8px;
+}
+
+.card-title {
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.card small {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+}
+
+.card .d-flex.justify-content-between.p-3 {
+    padding: 8px 16px 14px !important;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 6px;
+}
+
+/* ---------- Категории ---------- */
+.list_categories .btn {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: var(--text-muted);
+    text-align: left;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    padding: 9px 14px;
+    transition: all 0.2s ease;
+}
+
+.list_categories .btn:hover {
+    border-color: var(--gold-border);
+    color: var(--text);
+    background: var(--gold-soft);
+}
+
+/* ---------- Страница фильма ---------- */
+.movie_info h4 {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.movie_info .info p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.movie_descr h3,
+.movie_trailer_download h3,
+.same_movies h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text) !important;
+    border-left: 2px solid var(--gold);
+    padding-left: 12px;
+}
+
+.movie_photo img {
+    border-radius: var(--radius-md);
+    object-fit: cover;
+}
+
+.movie_trailer_download iframe {
+    border-radius: var(--radius-md);
+}
+
+/* ---------- Разное ---------- */
+hr {
+    border-color: var(--border);
+    opacity: 1;
+}
+
+a {
+    color: var(--gold);
+    text-decoration: none;
+}
+
+a:hover {
+    color: #d8b25f;
+}
+
+/* =====================================================================
+   Авторизация / Регистрация
+   ===================================================================== */
+
+.auth-wrapper {
+    min-height: calc(100vh - 90px);
+    display: flex;
+    align-items: stretch;
+    margin: -1.5rem -12px 0;
+}
+
+.auth-brand {
+    flex: 1 1 42%;
+    position: relative;
+    background: var(--bg-elevated);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 56px;
+    overflow: hidden;
+    border-right: 1px solid var(--border-soft);
+}
+
+.auth-brand::before {
+    /* тонкая перфорация киноплёнки вдоль правого края */
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -1px;
+    width: 1px;
+    background-image: linear-gradient(var(--border) 6px, transparent 6px);
+    background-size: 1px 18px;
+    opacity: 0.6;
+}
+
+.auth-brand .eyebrow {
+    color: var(--gold);
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    margin-bottom: 18px;
+}
+
+.auth-brand h1 {
+    font-size: 2.6rem;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 20px;
+}
+
+.auth-brand p {
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    max-width: 340px;
+    line-height: 1.6;
+}
+
+.auth-form-side {
+    flex: 1 1 58%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 380px;
+}
+
+.auth-card h4 {
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.auth-card .auth-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+}
+
+.field-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.field-group label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+
+.field-group .form-control,
+.field-group input {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.field-group .form-control:focus,
+.field-group input:focus {
+    outline: none;
+    border-color: var(--gold-border);
+    background: var(--bg-card);
+}
+
+.field-group .form-text,
+.field-group .helptext {
+    display: block;
+    color: var(--text-faint);
+    font-size: 0.76rem;
+    margin-top: 6px;
+}
+
+.field-errors {
+    color: #e07a6b;
+    font-size: 0.8rem;
+    margin-top: 6px;
+}
+
+.auth-error-box {
+    background: rgba(224, 122, 107, 0.1);
+    border: 1px solid rgba(224, 122, 107, 0.35);
+    color: #e07a6b;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.auth-submit {
+    width: 100%;
+    background: var(--gold);
+    border: 1px solid var(--gold);
+    color: #0b0b0d;
+    font-weight: 600;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    transition: background 0.2s ease;
+}
+
+.auth-submit:hover {
+    background: #d8b25f;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 26px 0;
+    color: var(--text-faint);
+    font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.auth-switch {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.auth-switch a {
+    color: var(--gold);
+    font-weight: 500;
+}
+
+@media (max-width: 900px) {
+    .auth-brand {
+        display: none;
+    }
+    .auth-wrapper {
+        margin: -1.5rem 0 0;
+    }
+}

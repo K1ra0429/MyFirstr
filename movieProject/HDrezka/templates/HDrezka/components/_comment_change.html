@@ -1,0 +1,22 @@
+<div class="collapse" id="commentChange{{ comment.pk }}">
+    <div class="bg-black p-2 rounded">
+
+        <form action="{% url 'comment_update' comment.pk %}" method="post">
+           {% csrf_token %}
+            <p>
+
+                <textarea name="text" cols="40" rows="10" class="form-control bg-dark text-light border-light"
+                          style="height: 50px;" maxlength="350" required="" id="id_text">{{ comment.text }}</textarea>
+            </p>
+
+            <button type="submit" class="btn btn-dark border-light">Изменить</button>
+        </form>
+
+
+    </div>
+</div>
+
+
+
+
+
