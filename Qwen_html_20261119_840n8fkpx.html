@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMULAB — Research Workspace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath d='M14 2 24.4 8v12L14 26 3.6 20V8Z' fill='%23101015' stroke='%23FF2742' stroke-width='1.6'/%3E%3Ccircle cx='14' cy='14' r='3' fill='%23FF2742'/%3E%3Cellipse cx='14' cy='14' rx='8' ry='3.4' fill='none' stroke='%23FF8A94' stroke-width='1' transform='rotate(-24 14 14)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ================= TOKENS ================= */
+:root{
+  --background:#060608; --sidebar:#0B0B0F; --panel:#101015; --card:#15151B; --raised:#1B1B22;
+  --accent:#FF2742; --accent-hi:#FF4D61; --accent-lo:#D31230; --accent-deep:#A50E26;
+  --text-1:#F7F7F9; --text-2:#9A9AA6; --text-3:#5F5F6B; --placeholder:#7A7A88;
+  --border:rgba(255,255,255,.07); --border-2:rgba(255,255,255,.13); --border-red:rgba(255,39,66,.3);
+  --success:#3FD68F; --warning:#E4A64B; --error:#FF5B69; --info:#FF8A94;
+  --field:#0B0B10; --ring:#FF6B7A;
+  --sb-w:248px; --sb-w-c:72px; --tb-h:64px;
+  --r-sm:6px; --r-md:9px; --r-lg:14px; --r-xl:16px;
+  --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-disp:'Space Grotesk',var(--font-body);
+  --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.3,1);
+  --glow:0 0 22px rgba(255,39,66,.35);
+  --shadow-pop:0 16px 44px rgba(0,0,0,.65),0 2px 10px rgba(0,0,0,.5);
+}
+/* ================= BASE ================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{scrollbar-gutter:stable;scroll-behavior:smooth}
+html.lock{overflow:hidden}
+body{background:var(--background);color:var(--text-1);font:400 14px/1.5 var(--font-body);-webkit-font-smoothing:antialiased;min-height:100vh;position:relative}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(720px 420px at 82% -8%,rgba(255,39,66,.075),transparent 70%),radial-gradient(520px 320px at -10% 108%,rgba(255,39,66,.05),transparent 70%)}
+#app{position:relative;z-index:1}
+::selection{background:rgba(255,39,66,.45);color:#fff}
+h1,h2,h3{font-family:var(--font-disp);font-weight:600;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text-1)}
+img,svg{display:block;max-width:100%}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:var(--r-sm)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#0B0B0F}
+::-webkit-scrollbar-thumb{background:#3A1116;border:2px solid #060608;border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:#6E1622}
+*{scrollbar-width:thin;scrollbar-color:#3A1116 #0B0B0F}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.icn{flex:none}
+.skip-link{position:fixed;top:-48px;left:12px;z-index:200;background:var(--accent);color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;transition:top .15s}
+.skip-link:focus{top:12px}
+.kbd{font:500 10px var(--font-mono);color:var(--text-2);background:var(--raised);border:1px solid var(--border-2);border-bottom-width:2px;border-radius:5px;padding:2px 6px;white-space:nowrap}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ================= BUTTONS / CHIPS ================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:37px;padding:0 16px;border-radius:var(--r-md);border:1px solid transparent;font-size:13px;font-weight:600;transition:all .15s var(--ease);white-space:nowrap;user-select:none}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(180deg,#FF3B52,#D31230);color:#fff;border-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 18px rgba(255,39,66,.35)}
+.btn-primary:hover{background:linear-gradient(180deg,#FF4D61,#E01634);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 6px 26px rgba(255,39,66,.5)}
+.btn-primary:active{background:linear-gradient(180deg,#E01634,#B00E26)}
+.btn-secondary{background:var(--card);border-color:var(--border-2);color:var(--text-1)}
+.btn-secondary:hover{background:var(--raised);border-color:rgba(255,39,66,.4);box-shadow:0 0 14px rgba(255,39,66,.12)}
+.btn-ghost{background:transparent;color:var(--text-2)}
+.btn-ghost:hover{background:rgba(255,255,255,.05);color:var(--text-1)}
+.btn-danger{background:rgba(255,91,105,.1);color:var(--error);border-color:rgba(255,91,105,.35)}
+.btn-danger:hover{background:rgba(255,91,105,.18)}
+.btn-danger-solid{background:linear-gradient(180deg,#FF5B69,#D31230);color:#fff;border-color:rgba(255,255,255,.16)}
+.btn-danger-solid:hover{filter:brightness(1.1)}
+.btn-sm{height:31px;padding:0 12px;font-size:12px;gap:6px}
+.btn-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--r-md);color:var(--text-2);border:1px solid transparent;transition:all .14s;position:relative;flex:none}
+.btn-icon:hover{background:rgba(255,39,66,.1);color:var(--accent-hi)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:6px;font:500 10.5px var(--font-mono);letter-spacing:.02em;color:#FFB4BC;background:rgba(255,39,66,.08);border:1px solid rgba(255,39,66,.22);white-space:nowrap}
+.tag .dot{width:6px;height:6px;border-radius:2px;background:var(--h,var(--accent));flex:none;box-shadow:0 0 6px var(--h,var(--accent))}
+.status{display:inline-flex;align-items:center;gap:6px;font:500 10px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);white-space:nowrap}
+.status .dot{width:6px;height:6px;border-radius:50%;background:var(--sc,var(--text-2));flex:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--sc,#9A9AA6) 18%,transparent),0 0 8px var(--sc,transparent)}
+.count-chip{font:500 10px var(--font-mono);color:var(--text-2);background:var(--raised);border:1px solid var(--border);padding:2px 7px;border-radius:5px}
+.badge{position:absolute;top:1px;right:1px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--accent);color:#fff;font:600 9px/15px var(--font-mono);text-align:center;box-shadow:0 0 10px rgba(255,39,66,.7),0 0 0 2px var(--background)}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:999px;background:rgba(255,39,66,.13);border:1px solid rgba(255,39,66,.42);color:#FF9AA3;font:500 9.5px var(--font-mono);letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 16px rgba(255,39,66,.15)}
+.pill .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+/* ================= SHELL ================= */
+.app{min-height:100vh}
+.content{margin-left:var(--sb-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .2s var(--ease)}
+.app.sb-collapsed .content{margin-left:var(--sb-w-c)}
+.main{flex:1;width:100%;max-width:1600px;margin:0 auto;padding:22px 26px 44px}
+.main:focus{outline:none}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:60;transition:width .2s var(--ease),transform .22s var(--ease)}
+.app.sb-collapsed .sidebar{width:var(--sb-w-c)}
+.sb-head{display:flex;align-items:center;gap:8px;padding:14px 12px 12px;border-bottom:1px solid var(--border);min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border-radius:8px;padding:2px}
+.brand svg{filter:drop-shadow(0 0 8px rgba(255,39,66,.55))}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand-text b{font:700 15px var(--font-disp);letter-spacing:.14em}
+.brand-text i{font:400 8.5px var(--font-mono);font-style:normal;color:var(--text-3);letter-spacing:.16em;margin-top:2px}
+.sb-toggle{width:28px;height:28px;flex:none}
+.sb-toggle .icn{transition:transform .2s var(--ease)}
+.app.sb-collapsed .sb-toggle .icn{transform:scaleX(-1)}
+.sb-close{display:none}
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 10px 12px}
+.sb-group-label{font:500 9.5px var(--font-mono);letter-spacing:.16em;color:var(--text-3);text-transform:uppercase;padding:16px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;height:37px;padding:0 11px;border-radius:9px;color:var(--text-2);font-size:13px;font-weight:500;position:relative;transition:all .14s;margin-bottom:2px}
+.nav-item .icn{color:var(--text-3);transition:color .14s}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text-1)}
+.nav-item:hover .icn{color:var(--accent-hi)}
+.nav-item.active{background:linear-gradient(90deg,#FF2742,#D31230);color:#fff;box-shadow:0 0 18px rgba(255,39,66,.4),inset 0 1px 0 rgba(255,255,255,.2)}
+.nav-item.active .icn{color:#fff}
+.nav-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-item .badge{position:static;box-shadow:0 0 8px rgba(255,39,66,.6);margin-left:auto}
+.sb-foot{border-top:1px solid var(--border);padding:8px 10px 12px}
+.sb-profile{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border-radius:9px;margin-top:6px;transition:background .13s;text-align:left}
+.sb-profile:hover{background:rgba(255,255,255,.05)}
+.avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,39,66,.12);border:1px solid rgba(255,39,66,.4);display:flex;align-items:center;justify-content:center;color:var(--accent-hi);flex:none;box-shadow:0 0 12px rgba(255,39,66,.18)}
+.sb-profile-text{flex:1;min-width:0;line-height:1.2}
+.sb-profile-text b{display:block;font-size:12.5px;font-weight:600}
+.sb-profile-text i{font:400 9.5px var(--font-mono);font-style:normal;color:var(--text-3);letter-spacing:.04em}
+.app.sb-collapsed .hide-c{display:none}
+.app.sb-collapsed .sb-head{flex-direction:column;gap:10px;padding:14px 8px}
+.app.sb-collapsed .brand{flex:none;justify-content:center}
+.app.sb-collapsed .sb-group-label{height:1px;padding:0;margin:12px 8px 8px;background:var(--border);font-size:0;overflow:hidden}
+.app.sb-collapsed .nav-item{justify-content:center;padding:0}
+.app.sb-collapsed .nav-item .badge{position:absolute;top:3px;right:3px;margin:0}
+.app.sb-collapsed .sb-profile{justify-content:center;padding:6px}
+.scrim{position:fixed;inset:0;background:rgba(2,2,4,.7);z-index:90;opacity:0;transition:opacity .2s}
+.scrim.show{opacity:1}
+.topbar{position:sticky;top:0;z-index:50;height:var(--tb-h);background:rgba(6,6,8,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 20px}
+.tb-left{display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto}
+.tb-menu{display:none}
+.tb-context{min-width:0;line-height:1.2}
+.tb-crumb{font-size:9.5px;letter-spacing:.14em;color:var(--text-3);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title{font:600 14.5px var(--font-disp);margin-top:2px;white-space:nowrap}
+.tb-center{flex:1;display:flex;justify-content:center;min-width:0}
+.tb-search{display:flex;align-items:center;gap:9px;width:min(430px,100%);height:37px;padding:0 10px 0 13px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text-3);font-size:12.5px;transition:all .15s}
+.tb-search:hover{border-color:rgba(255,39,66,.4);box-shadow:0 0 14px rgba(255,39,66,.1)}
+.tb-search-ph{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--placeholder)}
+.tb-search-icon{display:none}
+.tb-right{display:flex;align-items:center;gap:8px;flex:none}
+.tb-ws{display:flex;align-items:center;gap:8px;height:35px;padding:0 11px;border-radius:9px;border:1px solid var(--border);background:var(--panel);color:var(--text-2);font-size:12px;font-weight:500;max-width:210px;transition:all .14s}
+.tb-ws:hover{border-color:rgba(255,39,66,.4);color:var(--text-1)}
+.tb-ws .icn{color:var(--accent-hi)}
+.tb-ws-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-avatar{width:35px;height:35px;border-radius:50%;background:rgba(255,39,66,.12);border:1px solid rgba(255,39,66,.4);display:flex;align-items:center;justify-content:center;color:var(--accent-hi);transition:all .14s;box-shadow:0 0 12px rgba(255,39,66,.15)}
+.tb-avatar:hover{box-shadow:0 0 18px rgba(255,39,66,.4);color:#fff}
+.mem-chip{font-size:9px;letter-spacing:.1em;color:var(--warning);border:1px solid rgba(228,166,75,.4);background:rgba(228,166,75,.1);padding:3px 7px;border-radius:5px;cursor:help}
+/* ================= SECTIONS / PANELS ================= */
+.reveal{animation:rise .32s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:26px 0 13px}
+.sec-title-wrap{display:flex;gap:12px;align-items:baseline;min-width:0}
+.sec-idx{font-size:11px;color:var(--accent-hi);letter-spacing:.08em}
+.sec-title{font-size:18px}
+.sec-sub{font-size:12.5px;color:var(--text-2);margin-top:3px}
+.panel{background:linear-gradient(180deg,#121218,#0E0E13);border:1px solid var(--border);border-radius:var(--r-lg);min-width:0}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.ph-t{display:flex;align-items:center;gap:10px;min-width:0}
+.ph-idx{font-size:10px;color:var(--accent-hi)}
+.ph-t h2{font-size:15px;white-space:nowrap}
+.ph-a{display:flex;align-items:center;gap:6px;flex:none}
+.link-more{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--font-mono);letter-spacing:.04em;color:var(--accent-hi);padding:6px 8px;border-radius:6px;transition:all .13s}
+.link-more:hover{color:#fff;background:rgba(255,39,66,.12);text-shadow:0 0 10px rgba(255,39,66,.6)}
+.link-more .icn{transition:transform .14s}
+.link-more:hover .icn{transform:translateX(2px)}
+.panel-body{padding:14px 18px}
+.panel-foot{padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;font:400 10.5px var(--font-mono);color:var(--text-3)}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h1{font-size:26px}
+.page-sub{font-size:13px;color:var(--text-2);margin-top:5px;max-width:64ch}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap}
+.back-link{display:inline-flex;align-items:center;gap:6px;font:500 10.5px var(--font-mono);letter-spacing:.1em;color:var(--text-3);margin-bottom:14px;padding:4px 6px;border-radius:6px}
+.back-link:hover{color:var(--accent-hi);background:rgba(255,39,66,.08)}
+/* ================= HERO / WELCOME ================= */
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:stretch}
+.hero-rail{display:flex;flex-direction:column;gap:14px;min-width:0}
+.welcome{position:relative;background:linear-gradient(180deg,#121218,#0C0C11);border:1px solid rgba(255,39,66,.18);border-radius:var(--r-xl);padding:30px 34px;overflow:hidden;min-height:308px;display:flex;flex-direction:column;justify-content:center}
+.welcome::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,39,66,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,39,66,.045) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(ellipse 70% 100% at 78% 40%,#000,transparent 75%);mask-image:radial-gradient(ellipse 70% 100% at 78% 40%,#000,transparent 75%);pointer-events:none}
+.welcome::after{content:"";position:absolute;right:-60px;top:-60px;width:420px;height:420px;background:radial-gradient(circle,rgba(255,39,66,.16),transparent 65%);pointer-events:none}
+.corner{position:absolute;width:11px;height:11px;border:0 solid rgba(255,39,66,.5);pointer-events:none;z-index:2}
+.c-tl{top:9px;left:9px;border-top-width:1px;border-left-width:1px}
+.c-tr{top:9px;right:9px;border-top-width:1px;border-right-width:1px}
+.c-bl{bottom:9px;left:9px;border-bottom-width:1px;border-left-width:1px}
+.c-br{bottom:9px;right:9px;border-bottom-width:1px;border-right-width:1px}
+.welcome-inner{position:relative;z-index:1;max-width:56%}
+.welcome .pill{margin-bottom:16px}
+.welcome h1{font-size:40px;line-height:1.08;letter-spacing:-.02em}
+.welcome h1 .accent{color:var(--accent);text-shadow:0 0 30px rgba(255,39,66,.6)}
+.welcome-sub{font-size:14px;color:var(--text-2);margin-top:12px;max-width:46ch}
+.welcome-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.telemetry{display:flex;flex-wrap:wrap;gap:12px 32px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+.tele-label{font:500 9px var(--font-mono);letter-spacing:.16em;color:var(--text-3);text-transform:uppercase}
+.tele-value{font:600 15px var(--font-disp);font-variant-numeric:tabular-nums;margin-top:4px}
+.tele-value small{font:400 12px var(--font-body);color:var(--text-2)}
+.welcome-viz{position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:0;pointer-events:none}
+/* Quick stats rail */
+.qs-body{padding:14px 18px}
+.stat-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-of-type{border-bottom:0}
+.stat-num{font:700 26px var(--font-disp);font-variant-numeric:tabular-nums;line-height:1}
+.stat-label{font:500 10px var(--font-mono);letter-spacing:.12em;color:var(--text-3);text-transform:uppercase}
+.mini-bars{display:flex;align-items:flex-end;gap:6px;height:56px;margin-top:12px}
+.mini-bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--h),color-mix(in srgb,var(--h) 55%,#000));min-height:3px;box-shadow:0 0 10px color-mix(in srgb,var(--h) 40%,transparent);transition:height .3s var(--ease)}
+.mini-bar.zero{background:var(--raised);box-shadow:none}
+.mini-labels{display:flex;gap:6px;margin-top:5px}
+.mini-labels span{flex:1;text-align:center;font:500 8.5px var(--font-mono);color:var(--text-3)}
+.qs-empty{font-size:11.5px;color:var(--text-3);padding:10px 0 4px;line-height:1.5}
+.rail-act .act-list::before{left:27px}
+.rail-act .act-item{padding:7px 14px;grid-template-columns:24px minmax(0,1fr) auto;gap:10px}
+.rail-act .act-node{width:24px;height:24px}
+.rail-act .act-text{font-size:11.5px}
+.rail-act .act-time{font-size:9.5px}
+/* ================= MODULES ================= */
+.modules-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.module-card{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#14141A,#0F0F14);border:1px solid var(--border);border-radius:12px;padding:16px;min-height:196px;transition:all .18s var(--ease);overflow:hidden}
+.module-card:hover,.module-card:focus-visible{border-color:rgba(255,39,66,.5);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 24px rgba(255,39,66,.16)}
+.mc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent-hi);background:rgba(255,39,66,.1);border:1px solid rgba(255,39,66,.32);box-shadow:0 0 14px rgba(255,39,66,.14);transition:all .18s}
+.module-card:hover .mc-icon{color:#fff;background:rgba(255,39,66,.2);box-shadow:0 0 20px rgba(255,39,66,.4)}
+.mc-icon .icn{filter:drop-shadow(0 0 5px rgba(255,39,66,.7))}
+.mc-idx{position:absolute;top:14px;right:14px;font:500 9px var(--font-mono);color:var(--text-3);letter-spacing:.12em}
+.mc-name{font:600 14.5px var(--font-disp);margin-top:13px}
+.mc-desc{font-size:11.5px;line-height:1.5;color:var(--text-2);margin-top:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:13px}
+.card-cta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent-hi);transition:all .14s}
+.card-cta .icn{transition:transform .15s}
+.module-card:hover .card-cta{color:#fff;text-shadow:0 0 10px rgba(255,39,66,.7)}
+.module-card:hover .card-cta .icn{transform:translateX(3px)}
+.mc-motif{position:absolute;right:6px;bottom:34px;color:var(--accent);opacity:.1;pointer-events:none;transition:opacity .18s}
+.module-card:hover .mc-motif{opacity:.22}
+.mc-status{font:500 8.5px var(--font-mono);letter-spacing:.12em;color:var(--text-3);text-transform:uppercase}
+/* ================= ROWS / TOOLBARS ================= */
+.list-toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center}
+.search-mini{position:relative;flex:1 1 170px;min-width:140px}
+.search-mini .icn{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
+.search-mini input{width:100%;height:33px;background:var(--field);border:1px solid var(--border);border-radius:8px;padding:0 10px 0 31px;font-size:12.5px;transition:all .14s}
+.search-mini input::placeholder{color:var(--placeholder)}
+.search-mini input:focus{border-color:rgba(255,39,66,.55);box-shadow:0 0 0 3px rgba(255,39,66,.14)}
+select.filter{height:33px;background:var(--field);border:1px solid var(--border);border-radius:8px;padding:0 26px 0 10px;font-size:12px;color:var(--text-2);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9AA6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer;max-width:160px}
+select.filter:hover{border-color:rgba(255,39,66,.4);color:var(--text-1)}
+select.filter:focus{border-color:rgba(255,39,66,.55);box-shadow:0 0 0 3px rgba(255,39,66,.14)}
+select.filter option{background:var(--raised);color:var(--text-1)}
+.toolbar-count{margin-left:auto;font-size:10px;color:var(--text-3);letter-spacing:.06em;white-space:nowrap}
+.data-row{display:grid;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);transition:background .12s}
+.data-row:last-child{border-bottom:0}
+.data-row:hover{background:rgba(255,39,66,.04)}
+.cols-project{grid-template-columns:minmax(0,1fr) 128px 104px 78px 62px}
+.cols-exp{grid-template-columns:minmax(0,1.3fr) 122px minmax(0,.7fr) 96px 78px 62px}
+.row-main{min-width:0}
+.row-name{font-size:13.5px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:4px}
+.row-name:hover{color:var(--accent-hi)}
+button.row-name{text-align:left;width:100%}
+.row-desc{font-size:11.5px;color:var(--text-2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-meta{display:contents}
+.row-time{font-size:10.5px;color:var(--text-3);white-space:nowrap}
+.row-actions{display:flex;gap:2px;justify-content:flex-end}
+.row-actions .btn-icon{width:28px;height:28px}
+.row-sub{font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ================= EMPTY ================= */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 18px;gap:4px}
+.empty-ic{width:38px;height:38px;border:1px dashed rgba(255,39,66,.4);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent-hi);margin-bottom:8px;box-shadow:0 0 14px rgba(255,39,66,.1)}
+.empty-title{font-size:13.5px;font-weight:600}
+.empty-text{font-size:12px;color:var(--text-2);max-width:42ch;line-height:1.55}
+.empty .btn{margin-top:12px}
+.empty.slim{padding:20px 14px}
+/* ================= ACTIVITY ================= */
+.act-list{position:relative;padding:6px 0}
+.act-list::before{content:"";position:absolute;left:29px;top:16px;bottom:16px;width:1px;background:linear-gradient(180deg,transparent,rgba(255,39,66,.25),transparent)}
+.act-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:start;padding:8px 16px;position:relative}
+.act-node{width:26px;height:26px;border-radius:50%;background:var(--raised);border:1px solid var(--border-2);display:flex;align-items:center;justify-content:center;color:var(--ac,var(--text-2));position:relative;z-index:1;box-shadow:0 0 10px color-mix(in srgb,var(--ac,#9A9AA6) 22%,transparent)}
+.act-text{font-size:12.5px;color:var(--text-2);line-height:1.45;padding-top:3px;min-width:0}
+.act-link{display:inline-block;font:600 9.5px var(--font-mono);letter-spacing:.1em;color:var(--accent-hi);margin-top:3px;padding:2px 4px;border-radius:4px}
+.act-link:hover{color:#fff;background:rgba(255,39,66,.14)}
+.act-time{font-size:10px;color:var(--text-3);padding-top:5px;white-space:nowrap}
+.act-day{font:500 9.5px var(--font-mono);letter-spacing:.16em;color:var(--accent-hi);text-transform:uppercase;padding:14px 16px 6px;border-bottom:1px solid var(--border)}
+/* ================= QUICK LAUNCH ================= */
+.ql-list{padding:6px}
+.ql-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;transition:all .13s}
+.ql-item:hover{background:rgba(255,39,66,.07)}
+.ql-ic{width:30px;height:30px;border-radius:8px;background:rgba(255,39,66,.09);border:1px solid rgba(255,39,66,.25);display:flex;align-items:center;justify-content:center;color:var(--accent-hi);flex:none;transition:all .13s}
+.ql-item:hover .ql-ic{box-shadow:0 0 14px rgba(255,39,66,.35);color:#fff}
+.ql-txt{flex:1;min-width:0}
+.ql-name{font-size:12.5px;font-weight:600}
+.ql-desc{font-size:10.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.ql-item>.icn{color:var(--text-3)}
+/* ================= LIBRARY ================= */
+.chips-row{display:flex;flex-wrap:wrap;gap:7px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.chip-btn{display:inline-flex;align-items:center;gap:7px;height:29px;padding:0 12px;border-radius:8px;border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text-2);transition:all .13s}
+.chip-btn:hover{border-color:rgba(255,39,66,.4);color:var(--text-1)}
+.chip-btn.active{background:rgba(255,39,66,.14);border-color:rgba(255,39,66,.5);color:#fff;box-shadow:0 0 12px rgba(255,39,66,.18)}
+.chip-btn .mono{font-size:9.5px;color:var(--text-3)}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:16px}
+.lib-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:left;transition:all .15s;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lib-card:hover{border-color:rgba(255,39,66,.45);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 16px rgba(255,39,66,.12)}
+.lib-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lib-cat-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--h,var(--accent-hi));background:color-mix(in srgb,var(--h,#FF2742) 11%,transparent);border:1px solid color-mix(in srgb,var(--h,#FF2742) 28%,transparent)}
+.lib-title{font-size:13px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-excerpt{font-size:11px;color:var(--text-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.lib-cat-label{font:500 9px var(--font-mono);letter-spacing:.12em;color:var(--h,var(--accent-hi));text-transform:uppercase}
+.lib-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border)}
+.lib-row:last-child{border-bottom:0}
+.lib-row .lib-cat-ic{width:26px;height:26px;flex:none}
+.lib-row-main{flex:1;min-width:0}
+/* ================= OVERVIEW ================= */
+.ov-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:26px;padding:18px}
+.ov-donut{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.donut-num{font:600 24px var(--font-disp);fill:var(--text-1)}
+.donut-cap{font:500 7.5px var(--font-mono);letter-spacing:.2em;fill:var(--text-3)}
+.legend{flex:1;min-width:150px;display:flex;flex-direction:column;gap:7px}
+.legend-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:11.5px}
+.legend-sw{width:9px;height:9px;border-radius:3px;background:var(--h);box-shadow:0 0 6px var(--h)}
+.legend-name{color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legend-n{font:500 11px var(--font-mono)}
+.legend-pct{font:400 10px var(--font-mono);color:var(--text-3);width:34px;text-align:right}
+.ov-right{display:flex;flex-direction:column;gap:18px;min-width:0}
+.ov-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ov-total{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
+.ov-total b{display:block;font:700 19px var(--font-disp);font-variant-numeric:tabular-nums}
+.ov-total span{font:500 8.5px var(--font-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase}
+.mono-label{font:500 9.5px var(--font-mono);letter-spacing:.16em;color:var(--text-3);text-transform:uppercase;margin-bottom:9px}
+.bar-row{display:grid;grid-template-columns:130px minmax(0,1fr) 30px;gap:10px;align-items:center;margin-bottom:7px;font-size:11.5px}
+.bar-name{color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:6px;background:var(--field);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--h));border-radius:3px;min-width:2px;box-shadow:0 0 8px color-mix(in srgb,var(--h) 50%,transparent)}
+.bar-n{font:500 11px var(--font-mono);text-align:right}
+.ov-recent{display:flex;flex-wrap:wrap;gap:8px}
+/* ================= GRIDS ================= */
+.grid-main{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:14px;margin-top:14px}
+.grid-secondary{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.footer-strip{margin-top:30px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 9.5px var(--font-mono);letter-spacing:.1em;color:var(--text-3);text-transform:uppercase}
+/* ================= DETAIL ================= */
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.detail-title{font-size:24px;overflow-wrap:anywhere}
+.detail-chips{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.archived-banner{display:flex;align-items:center;gap:10px;background:rgba(228,166,75,.08);border:1px solid rgba(228,166,75,.3);color:var(--warning);border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:16px}
+.detail-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+.meta-list{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 18px;font-size:12.5px}
+.meta-list dt{font:500 9.5px var(--font-mono);letter-spacing:.12em;color:var(--text-3);text-transform:uppercase;padding-top:2px}
+.meta-list dd{color:var(--text-1);overflow-wrap:anywhere}
+.meta-list dd .btn-icon{width:22px;height:22px;display:inline-flex;vertical-align:middle}
+.prose{font-size:13px;line-height:1.65;color:var(--text-2);white-space:pre-wrap;overflow-wrap:anywhere}
+.detail-note{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px dashed rgba(255,39,66,.3);border-radius:10px;padding:14px;font-size:12px;color:var(--text-2);line-height:1.55}
+.detail-note .icn{color:var(--accent-hi);margin-top:2px}
+.module-mini-row{display:flex;gap:6px;margin-top:10px}
+.module-mini{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--accent-hi);background:rgba(255,39,66,.09);border:1px solid rgba(255,39,66,.25)}
+/* ================= PLACEHOLDER / HELP / 404 ================= */
+.ph-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start}
+.ph-status-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ph-kicker{font-size:10px;letter-spacing:.18em;color:var(--accent-hi);text-transform:uppercase}
+.ph-name{font-size:30px}
+.ph-desc{font-size:14px;color:var(--text-2);line-height:1.65;margin-top:10px;max-width:60ch}
+.ph-note{font-size:12.5px;color:var(--text-3);line-height:1.6;margin-top:14px;max-width:60ch;border-left:2px solid rgba(255,39,66,.4);padding-left:14px}
+.caps{margin-top:22px}
+.caps-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.cap-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--text-2)}
+.cap-item .icn{color:var(--accent-hi)}
+.ph-viz{position:relative;background:radial-gradient(circle at 50% 45%,rgba(255,39,66,.12),transparent 70%),linear-gradient(180deg,#121218,#0C0C11);border:1px solid rgba(255,39,66,.22);border-radius:var(--r-xl);padding:26px;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:300px}
+.ph-viz::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,39,66,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,39,66,.04) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+.ph-viz svg{position:relative}
+.ph-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.help-block{padding:18px}
+.help-block h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.help-block h2 .icn{color:var(--accent-hi)}
+.help-step{display:flex;gap:11px;margin-bottom:11px;font-size:12.5px;color:var(--text-2);line-height:1.55}
+.help-step b{color:var(--text-1)}
+.step-n{font:500 10px var(--font-mono);color:var(--accent-hi);border:1px solid rgba(255,39,66,.4);background:rgba(255,39,66,.1);width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;box-shadow:0 0 8px rgba(255,39,66,.15)}
+.sc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-2)}
+.sc-row:last-child{border-bottom:0}
+.help-prose{font-size:12.5px;color:var(--text-2);line-height:1.65}
+.help-prose a{color:var(--accent-hi);text-decoration:underline;text-underline-offset:3px}
+.roadmap-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.roadmap-item:last-child{border-bottom:0}
+.roadmap-item .icn{color:var(--accent-hi)}
+.roadmap-item span{flex:1}
+.nf{display:flex;flex-direction:column;align-items:center;text-align:center;padding:70px 20px}
+.nf-code{font:600 44px var(--font-mono);color:var(--accent);letter-spacing:.1em;text-shadow:0 0 30px rgba(255,39,66,.5)}
+.nf h1{font-size:20px;margin-top:10px}
+.nf-path{font:400 11px var(--font-mono);color:var(--text-3);background:var(--panel);border:1px solid var(--border);padding:5px 12px;border-radius:6px;margin-top:12px}
+.nf .btn{margin-top:22px}
+/* ================= SETTINGS ================= */
+.settings-stack{display:flex;flex-direction:column;gap:14px;max-width:860px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:0}
+.set-info{min-width:0}
+.set-title{font-size:13.5px;font-weight:600}
+.set-desc{font-size:11.5px;color:var(--text-2);margin-top:3px;line-height:1.5;max-width:52ch}
+.switch{width:38px;height:21px;border-radius:11px;background:#26262E;border:1px solid var(--border-2);position:relative;transition:all .16s;flex:none}
+.switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#8B8B96;transition:all .16s var(--ease)}
+.switch[aria-checked="true"]{background:linear-gradient(90deg,#FF2742,#D31230);border-color:rgba(255,255,255,.2);box-shadow:0 0 12px rgba(255,39,66,.4)}
+.switch[aria-checked="true"] .knob{transform:translateX(17px);background:#fff}
+.set-mono{font:500 12px var(--font-mono);color:var(--text-2)}
+.storage-chip{display:inline-flex;align-items:center;gap:7px;font:500 10px var(--font-mono);letter-spacing:.1em;padding:5px 10px;border-radius:6px}
+.storage-ok{color:var(--success);background:rgba(63,214,143,.1);border:1px solid rgba(63,214,143,.3)}
+.storage-warn{color:var(--warning);background:rgba(228,166,75,.1);border:1px solid rgba(228,166,75,.35)}
+/* ================= POPOVER ================= */
+.popover{position:fixed;z-index:120;background:var(--raised);border:1px solid var(--border-2);border-radius:12px;box-shadow:var(--shadow-pop);opacity:0;transform:translateY(-4px);transition:opacity .14s var(--ease),transform .14s var(--ease);overflow:hidden}
+.popover.open{opacity:1;transform:none}
+.menu{padding:6px;min-width:230px;max-height:min(420px,70vh);overflow-y:auto}
+.menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-1);text-align:left;transition:background .12s}
+.menu-item:hover:not(:disabled){background:rgba(255,39,66,.1)}
+.menu-item .icn{color:var(--text-2)}
+.menu-item:hover:not(:disabled) .icn{color:var(--accent-hi)}
+.menu-item.danger{color:var(--error)}
+.menu-item.danger .icn{color:var(--error)}
+.menu-item:disabled{color:var(--text-3);cursor:not-allowed}
+.menu-item:disabled .icn{color:var(--text-3)}
+.mi-txt{flex:1;min-width:0}
+.mi-sub{display:block;font-size:10.5px;font-weight:400;color:var(--text-3);margin-top:1px}
+.menu-sep{height:1px;background:var(--border);margin:6px 4px}
+.menu-label{font:500 9px var(--font-mono);letter-spacing:.16em;color:var(--accent-hi);text-transform:uppercase;padding:7px 10px 4px}
+.menu-head{display:flex;gap:11px;align-items:center;padding:10px;border-bottom:1px solid var(--border);margin-bottom:5px}
+.menu-head b{font-size:13px;display:block}
+.menu-head i{font:400 10px var(--font-mono);font-style:normal;color:var(--text-3)}
+.notif-panel{width:344px;max-width:calc(100vw - 24px)}
+.notif-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.notif-head b{font:600 13.5px var(--font-disp)}
+.notif-list{max-height:340px;overflow-y:auto}
+.notif-item{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;width:100%;padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);transition:background .12s;position:relative}
+.notif-item:hover{background:rgba(255,39,66,.05)}
+.notif-item:last-child{border-bottom:0}
+.notif-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--nc);background:color-mix(in srgb,var(--nc) 11%,transparent);border:1px solid color-mix(in srgb,var(--nc) 25%,transparent)}
+.notif-title{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.unread-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 8px var(--accent)}
+.notif-body{font-size:11.5px;color:var(--text-2);margin-top:2px;line-height:1.45;overflow-wrap:anywhere}
+.notif-time{font:400 9.5px var(--font-mono);color:var(--text-3);margin-top:4px}
+.notif-foot{display:flex;justify-content:flex-end;gap:6px;padding:8px 10px;border-top:1px solid var(--border)}
+/* ================= MODAL ================= */
+.modal-scrim{position:fixed;inset:0;z-index:130;background:rgba(2,2,4,.78);display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 24px;overflow-y:auto}
+.modal{width:100%;max-width:560px;background:linear-gradient(180deg,#14141A,#0F0F14);border:1px solid var(--border-2);border-radius:var(--r-xl);box-shadow:0 28px 72px rgba(0,0,0,.7),0 0 40px rgba(255,39,66,.07);animation:pop .18s var(--ease)}
+.modal.sm{max-width:440px}
+@keyframes pop{from{opacity:0;transform:translateY(9px) scale(.985)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h2{font-size:16px}
+.modal-body{padding:20px}
+.modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--border)}
+.field{margin-bottom:15px}
+.field label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+.field label .mono{font-size:9.5px;color:var(--text-3);font-weight:400}
+.field input,.field textarea,.field select{width:100%;background:var(--field);border:1px solid var(--border-2);border-radius:9px;padding:9px 12px;font-size:13.5px;transition:all .14s}
+.field input::placeholder,.field textarea::placeholder{color:var(--placeholder)}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(255,39,66,.6);box-shadow:0 0 0 3px rgba(255,39,66,.15)}
+.field textarea{min-height:88px;resize:vertical;line-height:1.55}
+.field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%239A9AA6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;cursor:pointer}
+.field select option{background:var(--raised)}
+.field [aria-invalid="true"]{border-color:var(--error)!important}
+.field-err{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--error);margin-top:5px}
+.field-hint{font-size:11px;color:var(--text-3);margin-top:6px;line-height:1.5}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-info{display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:11.5px;color:var(--text-2);line-height:1.5}
+.form-info .icn{color:var(--accent-hi);margin-top:1px}
+.confirm-msg{font-size:13px;color:var(--text-2);line-height:1.65}
+.confirm-msg b{color:var(--text-1)}
+.about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}
+.about-stat{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center}
+.about-stat b{display:block;font:700 17px var(--font-disp)}
+.about-stat span{font:500 8px var(--font-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase}
+/* ================= DRAWER ================= */
+.drawer-scrim{position:fixed;inset:0;z-index:124;background:rgba(2,2,4,.66);animation:fade .16s}
+@keyframes fade{from{opacity:0}}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:125;width:min(432px,100vw);background:linear-gradient(180deg,#121218,#0E0E13);border-left:1px solid var(--border-2);display:flex;flex-direction:column;animation:slideIn .2s var(--ease);box-shadow:-16px 0 48px rgba(0,0,0,.55)}
+@keyframes slideIn{from{transform:translateX(26px);opacity:0}to{transform:none;opacity:1}}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border)}
+.drawer-head h2{font-size:15.5px;overflow-wrap:anywhere}
+.drawer-body{flex:1;overflow-y:auto;padding:18px}
+.drawer-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.drawer-section{margin-top:20px}
+.formula-block{display:block;background:var(--field);border:1px solid rgba(255,39,66,.25);border-radius:9px;padding:13px 15px;font:400 13px var(--font-mono);color:var(--text-1);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.drawer-foot{display:flex;gap:9px;padding:14px 18px;border-top:1px solid var(--border)}
+.drawer-foot .btn{flex:1}
+/* ================= SEARCH ================= */
+.search-scrim{position:fixed;inset:0;z-index:139;background:rgba(2,2,4,.76);animation:fade .15s}
+.search-panel{position:fixed;z-index:140;top:10vh;left:50%;transform:translateX(-50%);width:min(640px,calc(100vw - 24px));background:#121218;border:1px solid var(--border-2);border-radius:14px;box-shadow:0 28px 72px rgba(0,0,0,.7),0 0 44px rgba(255,39,66,.08);animation:pop .16s var(--ease);overflow:hidden}
+.search-input-row{display:flex;align-items:center;gap:11px;padding:0 14px;height:52px;border-bottom:1px solid var(--border)}
+.search-input-row>.icn{color:var(--accent-hi)}
+.search-input-row input{flex:1;background:none;border:0;font-size:14.5px;height:100%}
+.search-input-row input::placeholder{color:var(--placeholder)}
+.search-results{max-height:min(420px,58vh);overflow-y:auto;padding:7px}
+.sr-group{font:500 9px var(--font-mono);letter-spacing:.18em;color:var(--accent-hi);text-transform:uppercase;padding:9px 10px 5px}
+.sr-opt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:11px;align-items:center;width:100%;padding:8px 10px;border-radius:9px;text-align:left;transition:background .1s}
+.sr-opt.active{background:rgba(255,39,66,.13);box-shadow:inset 0 0 0 1px rgba(255,39,66,.3)}
+.sr-ic{width:28px;height:28px;border-radius:8px;background:var(--raised);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--h,var(--text-2))}
+.sr-opt.active .sr-ic{color:var(--accent-hi);border-color:rgba(255,39,66,.4);box-shadow:0 0 10px rgba(255,39,66,.25)}
+.sr-label{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-sub{font-size:10.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.sr-type{font:500 8.5px var(--font-mono);letter-spacing:.12em;color:var(--text-3);border:1px solid var(--border);padding:3px 6px;border-radius:4px;text-transform:uppercase}
+.search-foot{display:flex;align-items:center;gap:15px;height:40px;padding:0 14px;border-top:1px solid var(--border);font:400 10px var(--font-mono);color:var(--text-3)}
+.search-foot span{display:inline-flex;align-items:center;gap:5px}
+.search-empty{padding:26px 18px;text-align:center}
+.search-empty p{font-size:12.5px;color:var(--text-2)}
+.search-empty .btn{margin-top:14px}
+/* ================= TOAST / TOOLTIP ================= */
+.toast-root{position:fixed;bottom:16px;right:16px;z-index:150;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 32px))}
+.toast{display:flex;align-items:center;gap:10px;background:var(--raised);border:1px solid var(--border-2);border-radius:11px;padding:10px 12px;box-shadow:var(--shadow-pop);opacity:0;transform:translateY(8px);transition:opacity .18s var(--ease),transform .18s var(--ease)}
+.toast.show{opacity:1;transform:none}
+.toast.hide{opacity:0;transform:translateY(6px)}
+.toast>.icn{color:var(--tc)}
+.toast-msg{flex:1;font-size:12.5px;line-height:1.45;min-width:0;overflow-wrap:anywhere}
+.toast-act{font-size:12px;font-weight:600;color:var(--accent-hi);padding:4px 8px;border-radius:6px;flex:none}
+.toast-act:hover{background:rgba(255,39,66,.14)}
+.toast-x{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text-3);flex:none}
+.toast-x:hover{color:var(--text-1);background:rgba(255,255,255,.06)}
+.tooltip{position:fixed;z-index:160;background:#22222A;border:1px solid var(--border-2);border-radius:7px;padding:5px 9px;font-size:11.5px;color:var(--text-1);box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:none;max-width:250px;line-height:1.4}
+/* ================= MOTION ================= */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+html.reduce-motion{scroll-behavior:auto}
+/* ================= RESPONSIVE ================= */
+@media (max-width:1460px){.modules-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.module-card{min-height:180px}}
+@media (max-width:1280px){.ov-grid{grid-template-columns:1fr}.hero-grid{grid-template-columns:1fr}.hero-rail{display:grid;grid-template-columns:1fr 1fr;align-items:start}}
+@media (max-width:1100px){.grid-main{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.welcome-inner{max-width:62%}}
+@media (max-width:1023px){
+  .sidebar{transform:translateX(-103%);width:282px!important;z-index:95;box-shadow:16px 0 48px rgba(0,0,0,.6)}
+  .app.drawer-open .sidebar{transform:none}
+  .content,.app.sb-collapsed .content{margin-left:0}
+  .tb-menu{display:inline-flex}.sb-toggle{display:none}.sb-close{display:inline-flex}
+  .app.sb-collapsed .hide-c{display:revert}
+  .app.sb-collapsed .sb-head{flex-direction:row;padding:14px 12px 12px}
+  .app.sb-collapsed .sb-group-label{height:auto;padding:16px 10px 6px;margin:0;background:none;font-size:9.5px}
+  .app.sb-collapsed .nav-item{justify-content:flex-start;padding:0 11px}
+  .app.sb-collapsed .sb-profile{justify-content:flex-start;padding:8px}
+  .app.sb-collapsed .nav-item .badge{position:static;margin-left:auto}
+  .welcome-viz{opacity:.4;right:-70px}
+  .welcome-inner{max-width:100%}
+  .ph-grid{grid-template-columns:1fr}
+  .ph-viz{order:-1;min-height:220px;padding:18px}
+  .ph-viz svg{width:170px;height:auto}
+}
+@media (max-width:940px){
+  .cols-project,.cols-exp{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main actions" "meta meta";row-gap:7px}
+  .row-main{grid-area:main}.row-actions{grid-area:actions}
+  .row-meta{display:flex;flex-wrap:wrap;gap:7px 10px;grid-area:meta;align-items:center}
+  .ov-totals{grid-template-columns:repeat(2,1fr)}
+  .hero-rail{grid-template-columns:1fr}
+}
+@media (max-width:768px){
+  .main{padding:16px 14px 36px}.topbar{padding:0 12px;gap:10px}
+  .tb-ws{display:none}
+  .welcome{padding:24px 20px;min-height:0}
+  .welcome h1{font-size:30px}
+  .welcome-viz{display:none}
+  .telemetry{gap:12px 24px}
+  .sec-head{margin:22px 0 11px}
+  .page-head h1{font-size:22px}
+  .form-row{grid-template-columns:1fr}
+  .modal-scrim{padding:5vh 10px 16px}
+}
+@media (max-width:640px){
+  .modules-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tb-search{display:none}.tb-search-icon{display:inline-flex}
+  .tb-create .hide-sm{display:none}.tb-create{width:35px;padding:0}
+  .tb-title{font-size:13px}
+  .detail-head{flex-direction:column}
+}
+@media (max-width:440px){.modules-grid{grid-template-columns:1fr}.module-card{min-height:0}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="app" class="app">
+  <aside id="sidebar" class="sidebar" aria-label="Primary navigation"></aside>
+  <div id="scrim" class="scrim" hidden></div>
+  <div class="content">
+    <header id="topbar" class="topbar"></header>
+    <main id="main" class="main" tabindex="-1"></main>
+  </div>
+</div>
+<div id="popover-root"></div>
+<div id="drawer-root"></div>
+<div id="modal-root"></div>
+<div id="search-root"></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+<script>
+'use strict';
+/* ================= UTILS ================= */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+const nowIso=()=>new Date().toISOString();
+const isMac=/Mac|iPhone|iPad/i.test(navigator.platform||navigator.userAgent||'');
+const isIso=v=>typeof v==='string'&&isFinite(Date.parse(v));
+const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+function fmtDate(iso){try{const d=new Date(iso),sy=d.getFullYear()===new Date().getFullYear();return new Intl.DateTimeFormat(undefined,{day:'numeric',month:'short',year:sy?undefined:'numeric'}).format(d);}catch(e){return '—';}}
+function fmtDateTime(iso){try{return new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(new Date(iso));}catch(e){return '—';}}
+function fmtLongDate(d){try{const s=new Intl.DateTimeFormat(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(d);return s.charAt(0).toUpperCase()+s.slice(1);}catch(e){return d.toDateString();}}
+function relTime(iso){const s=(Date.now()-Date.parse(iso))/1000;if(!isFinite(s))return '—';if(s<45)return 'just now';const m=s/60;if(m<60)return Math.floor(m)+'m ago';const h=m/60;if(h<24)return Math.floor(h)+'h ago';const d=h/24;if(d<7)return Math.floor(d)+'d ago';return fmtDate(iso);}
+function timeLabel(iso){return Store.state.prefs.timeFormat==='absolute'?fmtDateTime(iso):relTime(iso);}
+function timeHTML(iso,cls){return `<time class="mono ${cls||''}" datetime="${esc(iso)}" title="${esc(fmtDateTime(iso))}">${esc(timeLabel(iso))}</time>`;}
+function fmtBytes(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(2)+' MB';}
+let lockCount=0;
+function lockScroll(){lockCount++;document.documentElement.classList.add('lock');}
+function unlockScroll(){lockCount=Math.max(0,lockCount-1);if(!lockCount)document.documentElement.classList.remove('lock');}
+function trapTab(container,e){const f=$$('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])',container).filter(el=>el.getClientRects().length>0);if(!f.length)return;const first=f[0],last=f[f.length-1],a=document.activeElement;if(e.shiftKey&&(a===first||!container.contains(a))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(a===last||!container.contains(a))){e.preventDefault();first.focus();}}
+
+/* ================= ICONS ================= */
+const ICON_PATHS={
+dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+sigma:'<path d="M18 7V4H6l6 8-6 8h12v-3"/>',
+atom:'<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>',
+code:'<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
+cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/>',
+flask:'<path d="M10 2v7.5a2 2 0 0 1-.2.9L4.7 20.5a1 1 0 0 0 .9 1.5h12.8a1 1 0 0 0 .9-1.5L14.2 10.4a2 2 0 0 1-.2-.9V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
+book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+database:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+calculator:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M16 14h.01M8 14h.01M12 18h.01M16 18h.01M8 18h.01"/>',
+chart:'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/>',
+file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/>',
+library:'<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+settings:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+user:'<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+plus:'<path d="M5 12h14M12 5v14"/>',
+search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+'chevron-down':'<path d="m6 9 6 6 6-6"/>','chevron-right':'<path d="m9 18 6-6-6-6"/>',
+dots:'<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+archive:'<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+restore:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+trash:'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/>',
+pencil:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
+'arrow-right':'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>','arrow-up-right':'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>','arrow-left':'<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+check:'<path d="M20 6 9 17l-5-5"/>','check-circle':'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+'alert-circle':'<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/>',
+menu:'<path d="M4 6h16M4 12h16M4 18h16"/>','panel-left':'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>',
+folder:'<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+function:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3"/><path d="M9 11.2h5.7"/>',
+equals:'<path d="M5 9h14M5 15h14"/>',terminal:'<path d="m4 17 6-6-6-6"/><path d="M12 19h8"/>',
+activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+orbit:'<path d="M20.34 6.48A10 10 0 0 1 10.27 21.85"/><path d="M3.66 17.52A10 10 0 0 1 13.74 2.15"/><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/>',
+inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+note:'<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M16 21v-4a1 1 0 0 1 1-1h4"/>',
+bookmark:'<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+copy:'<rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+history:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+command:'<path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/>',
+grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>'
+};
+function icon(name,size,cls){const p=ICON_PATHS[name]||ICON_PATHS.clock;return `<svg class="icn ${cls||''}" width="${size||18}" height="${size||18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${p}</svg>`;}
+const LOGO_SVG=`<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><defs><linearGradient id="lg-hex" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF4D61"/><stop offset="1" stop-color="#A50E26"/></linearGradient></defs><path d="M14 2.2 24.2 8.1v11.8L14 25.8 3.8 19.9V8.1Z" fill="#101015" stroke="url(#lg-hex)" stroke-width="1.7"/><ellipse cx="14" cy="14" rx="7.6" ry="3.2" fill="none" stroke="#FF8A94" stroke-width="1" opacity=".85" transform="rotate(-24 14 14)"/><circle cx="14" cy="14" r="2.6" fill="#FF2742"/><circle cx="19.8" cy="9.6" r="1.2" fill="#FFC9CE"/></svg>`;
+
+/* ================= CONFIG ================= */
+const DISCIPLINES=[
+{id:'mathematics',label:'Mathematics',color:'#FF9AA3',short:'M'},
+{id:'physics',label:'Physics',color:'#FF6B78',short:'P'},
+{id:'computer-science',label:'Computer Science',color:'#FF2742',short:'C'},
+{id:'engineering',label:'Engineering',color:'#E01634',short:'E'},
+{id:'general-science',label:'General Science',color:'#B01230',short:'S'},
+{id:'interdisciplinary',label:'Interdisciplinary Research',color:'#8E1024',short:'I'}
+];
+const DISC=Object.fromEntries(DISCIPLINES.map(d=>[d.id,d]));
+const DISC_IDS=DISCIPLINES.map(d=>d.id);
+const PROJECT_STATUSES=[{id:'draft',label:'Draft',color:'#9A9AA6'},{id:'in-progress',label:'In Progress',color:'#FF2742'},{id:'completed',label:'Completed',color:'#3FD68F'},{id:'archived',label:'Archived',color:'#5F5F6B'}];
+const PSTAT=Object.fromEntries(PROJECT_STATUSES.map(s=>[s.id,s]));
+const EXP_STATUSES=[{id:'draft',label:'Draft',color:'#9A9AA6'},{id:'in-progress',label:'Running',color:'#FF2742'},{id:'completed',label:'Completed',color:'#3FD68F'}];
+const ESTAT=Object.fromEntries(EXP_STATUSES.map(s=>[s.id,s]));
+const LIB_CATEGORIES=[{id:'formula',label:'Formula',icon:'function',color:'#FF9AA3'},{id:'note',label:'Research Note',icon:'note',color:'#FF6B78'},{id:'reference',label:'Reference',icon:'bookmark',color:'#FF2742'},{id:'document',label:'Document',icon:'file',color:'#E01634'}];
+const LIBCAT=Object.fromEntries(LIB_CATEGORIES.map(c=>[c.id,c]));
+const TEMPLATES=[
+{id:'blank',label:'Blank Workspace',discipline:null,hint:'An empty workspace. No starter records are added.',note:null},
+{id:'math',label:'Mathematical Investigation',discipline:'mathematics',hint:'Adds a starter investigation outline to your library.',note:{title:'Investigation outline',content:'Research question:\n\nKnown relations / definitions:\n\nApproach:\n\nExpected result:'}},
+{id:'physics-exp',label:'Physics Experiment',discipline:'physics',hint:'Adds a starter experiment protocol to your library.',note:{title:'Experiment protocol',content:'Phenomenon under study:\n\nSetup & instruments:\n\nVariables (independent / dependent / controlled):\n\nMeasurement plan:\n\nError sources:'}},
+{id:'programming',label:'Programming Project',discipline:'computer-science',hint:'Adds a starter computational plan to your library.',note:{title:'Computational plan',content:'Problem statement:\n\nInput / output contract:\n\nAlgorithm sketch:\n\nComplexity considerations:\n\nTest cases:'}},
+{id:'engineering',label:'Engineering Design',discipline:'engineering',hint:'Adds a starter design brief to your library.',note:{title:'Design brief',content:'Requirements:\n\nConstraints:\n\nProposed architecture:\n\nComponents & interfaces:\n\nValidation plan:'}},
+{id:'research',label:'Scientific Research',discipline:'interdisciplinary',hint:'Adds a starter research protocol to your library.',note:{title:'Research protocol',content:'Hypothesis:\n\nBackground & references:\n\nMethod:\n\nObservations:\n\nConclusions:'}}
+];
+const TPL=Object.fromEntries(TEMPLATES.map(t=>[t.id,t]));
+const MODULES=[
+{route:'math-lab',name:'Math Lab',icon:'sigma',discipline:'mathematics',idx:'01',motif:'math',desc:'Explore mathematical concepts through equations, algebra, functions, mathematical modeling, and interactive graph visualization.',caps:['Equation editor & solver','Function graphing & analysis','Step-by-step algebra workspace','Mathematical modeling notebooks']},
+{route:'physics-lab',name:'Physics Lab',icon:'atom',discipline:'physics',idx:'02',motif:'physics',desc:'Investigate physical phenomena through mechanics, motion, electricity, magnetism, waves, optics, and interactive simulations.',caps:['Mechanics & motion sandbox','Circuits, fields & magnetism','Wave & optics bench','Measurement & error analysis']},
+{route:'code-lab',name:'Code Lab',icon:'code',discipline:'computer-science',idx:'03',motif:'code',desc:'Develop computational thinking through programming, algorithms, code execution, logical structures, and computational visualization.',caps:['Multi-language code editor','Algorithm visualizer','Execution & test runner','Computational notebooks']},
+{route:'engineering-lab',name:'Engineering Lab',icon:'cpu',discipline:'engineering',idx:'04',motif:'engineering',desc:'Design and explore engineering systems through electronics, electrical circuits, components, technical diagrams, and practical experiments.',caps:['Circuit schematic editor','Component library & datasheets','Signal & logic analysis','Design validation bench']},
+{route:'science-lab',name:'Science Lab',icon:'flask',discipline:'general-science',idx:'05',motif:'science',desc:'Explore scientific models, natural phenomena, interdisciplinary concepts, experimental investigations, and scientific principles.',caps:['Molecular & cell models','Phenomena explorer','Experiment planning tools','Cross-discipline concept maps']},
+{route:'research-hub',name:'Research Hub',icon:'book',discipline:'interdisciplinary',idx:'06',motif:'research',desc:'Organize research projects, formulate hypotheses, document observations, conduct investigations, and prepare scientific reports.',caps:['Hypothesis & protocol tracking','Observation journals','Evidence & citation manager','Report composer']}
+];
+const TOOLS=[
+{route:'simulab-data',name:'SIMULAB Data',icon:'database',discipline:'interdisciplinary',idx:'07',motif:'data',desc:'Collect, structure and analyze datasets produced by your projects and experiments.',caps:['Dataset tables & schemas','Import from project records','Statistics & quality checks','Export to open formats']},
+{route:'calculator',name:'Calculator',icon:'calculator',discipline:'mathematics',idx:'08',motif:'calculator',desc:'A precision scientific calculator with unit-aware expressions and calculation history.',caps:['Scientific & unit-aware input','Expression history','Constants & functions library','Project-scoped scratchpads']},
+{route:'graph-studio',name:'Graph Studio',icon:'chart',discipline:'mathematics',idx:'09',motif:'graph',desc:'Compose publication-quality plots and function graphs from your recorded data.',caps:['2D & 3D plotting','Function & data series','Styling & annotation','SVG / PNG export']},
+{route:'reports',name:'Reports',icon:'file',discipline:'interdisciplinary',idx:'10',motif:'reports',desc:'Assemble structured scientific reports from your projects, experiments and library records.',caps:['Report templates','Pull project evidence','Figures & citations','PDF export']}
+];
+const DEST=Object.fromEntries([...MODULES,...TOOLS].map(m=>[m.route,m]));
+const NAV_GROUPS=[
+{label:'Navigation',items:[{route:'dashboard',label:'Dashboard',icon:'dashboard'},...MODULES.map(m=>({route:m.route,label:m.name,icon:m.icon}))]},
+{label:'Instruments',items:[{route:'simulab-data',label:'SIMULAB Data',icon:'database'},{route:'calculator',label:'Calculator',icon:'calculator'},{route:'graph-studio',label:'Graph Studio',icon:'chart'}]},
+{label:'Workspace',items:[{route:'reports',label:'Reports',icon:'file'},{route:'library',label:'Library',icon:'library'}]}
+];
+const QUICK_LAUNCH=[
+{name:'Function Explorer',desc:'Plot and probe mathematical functions.',icon:'function',route:'math-lab'},
+{name:'Equation Solver',desc:'Solve equations step by step.',icon:'equals',route:'math-lab'},
+{name:'Graph Studio',desc:'Compose plots from recorded data.',icon:'chart',route:'graph-studio'},
+{name:'Scientific Calculator',desc:'Unit-aware precision calculations.',icon:'calculator',route:'calculator'},
+{name:'Physics Simulator',desc:'Run mechanics and wave experiments.',icon:'activity',route:'physics-lab'},
+{name:'Code Editor',desc:'Write and execute scientific code.',icon:'terminal',route:'code-lab'}
+];
+const ACT_META={'project.created':{icon:'plus',color:'#3FD68F'},'project.opened':{icon:'folder',color:'#FF6B78'},'project.updated':{icon:'pencil',color:'#E4A64B'},'project.archived':{icon:'archive',color:'#9A9AA6'},'project.restored':{icon:'restore',color:'#FF9AA3'},'project.deleted':{icon:'trash',color:'#FF5B69'},'experiment.created':{icon:'flask',color:'#FF2742'},'experiment.updated':{icon:'pencil',color:'#E4A64B'},'experiment.deleted':{icon:'trash',color:'#FF5B69'},'experiment.restored':{icon:'restore',color:'#FF9AA3'},'library.created':{icon:'library',color:'#FF6B78'},'library.updated':{icon:'pencil',color:'#E4A64B'},'library.deleted':{icon:'trash',color:'#FF5B69'},'library.restored':{icon:'restore',color:'#FF9AA3'},'data.exported':{icon:'download',color:'#FF8A94'},'data.imported':{icon:'upload',color:'#FF8A94'},'data.reset':{icon:'alert',color:'#E4A64B'},'data.activity-cleared':{icon:'history',color:'#9A9AA6'}};
+const NOTIF_META={success:{icon:'check-circle',color:'#3FD68F'},info:{icon:'info',color:'#FF8A94'},warning:{icon:'alert',color:'#E4A64B'},error:{icon:'alert-circle',color:'#FF5B69'}};
+const SCHEMA_VERSION=1,DB_KEY='simulab.workspace.v1',ACTIVITY_CAP=200,NOTIF_CAP=50;
+
+/* ================= VALIDATION / STORE ================= */
+function validProject(p){return p&&typeof p==='object'&&typeof p.id==='string'&&p.id&&typeof p.name==='string'&&p.name.trim()&&DISC_IDS.includes(p.discipline)&&PSTAT[p.status]&&isIso(p.createdAt)&&isIso(p.updatedAt);}
+function validExperiment(e){return e&&typeof e==='object'&&typeof e.id==='string'&&e.id&&typeof e.title==='string'&&e.title.trim()&&DISC_IDS.includes(e.discipline)&&ESTAT[e.status]&&isIso(e.createdAt)&&isIso(e.updatedAt);}
+function validLibItem(l){return l&&typeof l==='object'&&typeof l.id==='string'&&l.id&&typeof l.title==='string'&&l.title.trim()&&LIBCAT[l.category]&&typeof l.content==='string'&&isIso(l.createdAt)&&isIso(l.updatedAt);}
+function validActivity(a){return a&&typeof a.id==='string'&&typeof a.type==='string'&&typeof a.description==='string'&&isIso(a.createdAt);}
+function validNotif(n){return n&&typeof n.id==='string'&&NOTIF_META[n.type]&&typeof n.title==='string'&&isIso(n.createdAt);}
+function sanitizeState(raw){
+const dropped={n:0};
+const keep=(arr,fn,map)=>Array.isArray(arr)?arr.filter(x=>{const ok=fn(x);if(!ok)dropped.n++;return ok;}).map(map||(x=>x)):[];
+const projects=keep(raw.projects,validProject,p=>({id:p.id,name:String(p.name).slice(0,80),discipline:p.discipline,description:String(p.description||'').slice(0,400),template:TPL[p.template]?p.template:'blank',status:p.status,statusBeforeArchive:PSTAT[p.statusBeforeArchive]?p.statusBeforeArchive:undefined,createdAt:p.createdAt,updatedAt:p.updatedAt,lastOpenedAt:isIso(p.lastOpenedAt)?p.lastOpenedAt:undefined}));
+const pids=new Set(projects.map(p=>p.id));
+const experiments=keep(raw.experiments,validExperiment,e=>({id:e.id,title:String(e.title).slice(0,100),discipline:e.discipline,projectId:(typeof e.projectId==='string'&&pids.has(e.projectId))?e.projectId:null,status:e.status,notes:String(e.notes||'').slice(0,2000),createdAt:e.createdAt,updatedAt:e.updatedAt}));
+const library=keep(raw.library,validLibItem,l=>({id:l.id,title:String(l.title).slice(0,120),category:l.category,content:String(l.content).slice(0,5000),projectId:(typeof l.projectId==='string'&&pids.has(l.projectId))?l.projectId:null,createdAt:l.createdAt,updatedAt:l.updatedAt}));
+const activity=keep(raw.activity,validActivity,a=>({id:a.id,type:a.type,description:a.description,entityType:typeof a.entityType==='string'?a.entityType:undefined,entityId:typeof a.entityId==='string'?a.entityId:undefined,createdAt:a.createdAt})).slice(0,ACTIVITY_CAP);
+const notifications=keep(raw.notifications,validNotif,n=>({id:n.id,type:n.type,title:n.title,body:String(n.body||''),createdAt:n.createdAt,read:!!n.read})).slice(0,NOTIF_CAP);
+const rp=raw.prefs||{};
+const prefs={sidebarCollapsed:!!rp.sidebarCollapsed,reduceMotion:!!rp.reduceMotion,timeFormat:rp.timeFormat==='absolute'?'absolute':'relative'};
+const recentSearches=Array.isArray(raw.recentSearches)?raw.recentSearches.filter(s=>typeof s==='string'&&s.trim()).slice(0,6):[];
+return {state:{version:SCHEMA_VERSION,projects,experiments,library,activity,notifications,prefs,recentSearches},dropped:dropped.n};
+}
+function emptyState(){return {version:SCHEMA_VERSION,projects:[],experiments:[],library:[],activity:[],notifications:[],prefs:{sidebarCollapsed:false,reduceMotion:false,timeFormat:'relative'},recentSearches:[]};}
+const Store={
+state:emptyState(),storageOk:true,
+load(){let raw=null;try{raw=localStorage.getItem(DB_KEY);}catch(e){this.storageOk=false;}
+if(raw){try{const parsed=JSON.parse(raw);const{state,dropped}=sanitizeState(parsed&&typeof parsed==='object'?parsed:{});this.state=state;if(dropped>0)this.pushNotif('warning','Stored data repaired',dropped+' invalid record(s) were skipped while loading. Valid records were kept.');}catch(e){this.state=emptyState();this.pushNotif('warning','Stored data unreadable','The saved workspace could not be parsed. A fresh workspace was started; the raw data was left untouched in storage.');}}
+if(!this.storageOk)this.pushNotif('warning','Local storage unavailable','Changes are kept in memory for this session only. Export a backup before closing the tab.');},
+save(){if(!this.storageOk)return;try{localStorage.setItem(DB_KEY,JSON.stringify(this.state));}catch(e){this.storageOk=false;this.pushNotif('warning','Local storage unavailable','Saving failed (storage may be full or blocked). Changes are kept in memory — export a backup before closing.');}},
+commit(){this.save();renderShellBadges();renderRoute();},
+log(type,description,entityType,entityId){this.state.activity.unshift({id:uid(),type,description,entityType,entityId,createdAt:nowIso()});if(this.state.activity.length>ACTIVITY_CAP)this.state.activity.length=ACTIVITY_CAP;},
+pushNotif(type,title,body){this.state.notifications.unshift({id:uid(),type,title,body:String(body||''),createdAt:nowIso(),read:false});if(this.state.notifications.length>NOTIF_CAP)this.state.notifications.length=NOTIF_CAP;},
+notify(type,title,body){this.pushNotif(type,title,body);this.commit();},
+markNotifRead(id){const n=this.state.notifications.find(x=>x.id===id);if(n&&!n.read){n.read=true;this.commit();}},
+markAllNotifRead(){this.state.notifications.forEach(n=>n.read=true);this.commit();},
+clearNotifs(){this.state.notifications=[];this.commit();},
+createProject(data){const t=nowIso();const p={id:uid(),name:data.name,discipline:data.discipline,description:data.description||'',template:data.template||'blank',status:'draft',createdAt:t,updatedAt:t};this.state.projects.unshift(p);this.log('project.created',`Created project “${p.name}”`,'project',p.id);this.pushNotif('success','Project created',p.name);const tpl=TPL[p.template];if(tpl&&tpl.note){this.createLibraryItem({title:tpl.note.title+' — '+p.name,category:'note',content:tpl.note.content,projectId:p.id},{silent:true});}this.commit();return p;},
+getProject(id){return this.state.projects.find(p=>p.id===id)||null;},
+updateProject(id,patch){const p=this.getProject(id);if(!p)return null;Object.assign(p,patch);p.updatedAt=nowIso();this.log('project.updated',`Updated project “${p.name}”`,'project',p.id);this.commit();return p;},
+setProjectStatus(id,status){const p=this.getProject(id);if(!p||!PSTAT[status]||p.status===status)return null;p.status=status;p.updatedAt=nowIso();this.log('project.updated',`Status of “${p.name}” set to ${PSTAT[status].label}`,'project',p.id);this.commit();return p;},
+archiveProject(id){const p=this.getProject(id);if(!p||p.status==='archived')return null;p.statusBeforeArchive=p.status;p.status='archived';p.updatedAt=nowIso();this.log('project.archived',`Archived project “${p.name}”`,'project',p.id);this.commit();return p;},
+restoreProject(id){const p=this.getProject(id);if(!p||p.status!=='archived')return null;p.status=PSTAT[p.statusBeforeArchive]?p.statusBeforeArchive:'draft';p.statusBeforeArchive=undefined;p.updatedAt=nowIso();this.log('project.restored',`Restored project “${p.name}”`,'project',p.id);this.commit();return p;},
+deleteProject(id){const p=this.getProject(id);if(!p)return null;const exps=this.state.experiments.filter(e=>e.projectId===id);const libs=this.state.library.filter(l=>l.projectId===id);const snap={kind:'project',project:{...p},experiments:exps.map(e=>({id:e.id})),library:libs.map(l=>({id:l.id}))};exps.forEach(e=>e.projectId=null);libs.forEach(l=>l.projectId=null);this.state.projects=this.state.projects.filter(x=>x.id!==id);this.log('project.deleted',`Deleted project “${p.name}”`,'project',id);this.pushNotif('info','Project deleted',`“${p.name}” was removed. Linked records were kept and unlinked.`);this.commit();return snap;},
+touchOpen(id){const p=this.getProject(id);if(!p)return;const t=Date.now();if(p.lastOpenedAt&&t-Date.parse(p.lastOpenedAt)<60000)return;p.lastOpenedAt=nowIso();this.log('project.opened',`Opened project “${p.name}”`,'project',p.id);this.save();},
+createExperiment(data,opts){const t=nowIso();const e={id:uid(),title:data.title,discipline:data.discipline,projectId:data.projectId||null,status:data.status||'draft',notes:data.notes||'',createdAt:t,updatedAt:t};this.state.experiments.unshift(e);this.log('experiment.created',`Recorded experiment “${e.title}”`,'experiment',e.id);if(!(opts&&opts.silent))this.commit();return e;},
+getExperiment(id){return this.state.experiments.find(e=>e.id===id)||null;},
+updateExperiment(id,patch){const e=this.getExperiment(id);if(!e)return null;Object.assign(e,patch);e.updatedAt=nowIso();this.log('experiment.updated',`Updated experiment “${e.title}”`,'experiment',e.id);this.commit();return e;},
+deleteExperiment(id){const e=this.getExperiment(id);if(!e)return null;const snap={kind:'experiment',experiment:{...e}};this.state.experiments=this.state.experiments.filter(x=>x.id!==id);this.log('experiment.deleted',`Deleted experiment “${e.title}”`,'experiment',id);this.commit();return snap;},
+createLibraryItem(data,opts){const t=nowIso();const l={id:uid(),title:data.title,category:data.category,content:data.content||'',projectId:data.projectId||null,createdAt:t,updatedAt:t};this.state.library.unshift(l);this.log('library.created',`Saved ${LIBCAT[l.category].label.toLowerCase()} “${l.title}”`,'library',l.id);if(!(opts&&opts.silent))this.commit();return l;},
+getLibItem(id){return this.state.library.find(l=>l.id===id)||null;},
+updateLibItem(id,patch){const l=this.getLibItem(id);if(!l)return null;Object.assign(l,patch);l.updatedAt=nowIso();this.log('library.updated',`Updated “${l.title}”`,'library',l.id);this.commit();return l;},
+deleteLibItem(id){const l=this.getLibItem(id);if(!l)return null;const snap={kind:'library',item:{...l}};this.state.library=this.state.library.filter(x=>x.id!==id);this.log('library.deleted',`Deleted “${l.title}” from library`,'library',id);this.commit();return snap;},
+undoDelete(snap){if(!snap)return false;
+if(snap.kind==='project'){if(this.getProject(snap.project.id))return false;this.state.projects.unshift({...snap.project});snap.experiments.forEach(s=>{const e=this.getExperiment(s.id);if(e)e.projectId=snap.project.id;});snap.library.forEach(s=>{const l=this.getLibItem(s.id);if(l)l.projectId=snap.project.id;});this.log('project.restored',`Restored project “${snap.project.name}” (undo)`,'project',snap.project.id);}
+else if(snap.kind==='experiment'){if(this.getExperiment(snap.experiment.id))return false;if(snap.experiment.projectId&&!this.getProject(snap.experiment.projectId))snap.experiment.projectId=null;this.state.experiments.unshift({...snap.experiment});this.log('experiment.restored',`Restored experiment “${snap.experiment.title}” (undo)`,'experiment',snap.experiment.id);}
+else if(snap.kind==='library'){if(this.getLibItem(snap.item.id))return false;if(snap.item.projectId&&!this.getProject(snap.item.projectId))snap.item.projectId=null;this.state.library.unshift({...snap.item});this.log('library.restored',`Restored “${snap.item.title}” (undo)`,'library',snap.item.id);}
+this.commit();return true;},
+setPref(key,val){this.state.prefs[key]=val;applyPrefs();this.commit();},
+addRecentSearch(q){const n=norm(q);if(!n)return;this.state.recentSearches=[q,...this.state.recentSearches.filter(s=>norm(s)!==n)].slice(0,6);this.save();},
+clearRecentSearches(){this.state.recentSearches=[];this.save();},
+exportPayload(){const s=this.state;const payload={app:'SIMULAB',version:SCHEMA_VERSION,exportedAt:nowIso(),projects:s.projects,experiments:s.experiments,library:s.library,activity:s.activity};const n=s.projects.length+s.experiments.length+s.library.length;this.log('data.exported',`Exported workspace backup (${n} records)`,'data');this.pushNotif('success','Backup exported',n+' records written to a JSON file.');this.commit();return JSON.stringify(payload,null,2);},
+importPayload(raw){const{state}=sanitizeState(raw);this.state.projects=state.projects;this.state.experiments=state.experiments;this.state.library=state.library;this.state.activity=state.activity;this.log('data.imported',`Imported backup: ${state.projects.length} projects, ${state.experiments.length} experiments, ${state.library.length} library items`,'data');this.pushNotif('success','Backup imported',`${state.projects.length} projects, ${state.experiments.length} experiments, ${state.library.length} library items restored.`);this.commit();},
+resetWorkspace(){this.state.projects=[];this.state.experiments=[];this.state.library=[];this.state.activity=[];this.state.notifications=[];this.state.recentSearches=[];this.log('data.reset','Workspace was reset','data');this.pushNotif('info','Workspace reset','All records were removed from this browser. Preferences were kept.');this.commit();},
+clearActivity(){this.state.activity=[];this.log('data.activity-cleared','Activity history cleared','data');this.commit();}
+};
+const FILTER_DEFAULTS={'dash-projects':{q:'',discipline:'all',status:'active',sort:'recent'},'page-projects':{q:'',discipline:'all',status:'active',sort:'recent'},'page-experiments':{q:'',discipline:'all',status:'all',sort:'recent'},'page-library':{q:'',cat:'all',sort:'recent'},'page-activity':{type:'all'}};
+const ui=JSON.parse(JSON.stringify(FILTER_DEFAULTS));
+
+/* ================= GRAPHICS ================= */
+function atomSVG(prefix,w,h){
+const P=prefix;
+return `<svg width="${w||420}" height="${h||300}" viewBox="0 0 420 300" fill="none" aria-hidden="true" focusable="false">
+<defs>
+<radialGradient id="${P}-core" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="#FF8A94"/><stop offset=".62" stop-color="#FF2742"/><stop offset="1" stop-color="#FF2742" stop-opacity="0"/></radialGradient>
+<radialGradient id="${P}-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FF2742" stop-opacity=".4"/><stop offset="1" stop-color="#FF2742" stop-opacity="0"/></radialGradient>
+<linearGradient id="${P}-orb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF2742" stop-opacity=".9"/><stop offset=".5" stop-color="#FF9AA3" stop-opacity=".55"/><stop offset="1" stop-color="#FF2742" stop-opacity=".18"/></linearGradient>
+<filter id="${P}-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="210" cy="150" r="120" fill="url(#${P}-halo)"/>
+<circle cx="210" cy="150" r="168" stroke="rgba(255,39,66,.12)" stroke-dasharray="3 7"/>
+<g filter="url(#${P}-glow)">
+<ellipse cx="210" cy="150" rx="152" ry="52" stroke="url(#${P}-orb)" stroke-width="1.6" transform="rotate(-27 210 150)"/>
+<ellipse cx="210" cy="150" rx="152" ry="52" stroke="url(#${P}-orb)" stroke-width="1.6" transform="rotate(27 210 150)"/>
+<ellipse cx="210" cy="150" rx="150" ry="50" stroke="url(#${P}-orb)" stroke-width="1.4" transform="rotate(90 210 150)"/>
+</g>
+<circle cx="210" cy="150" r="30" fill="url(#${P}-core)" filter="url(#${P}-glow)"/>
+<circle cx="210" cy="150" r="9" fill="#fff" opacity=".92" filter="url(#${P}-glow)"/>
+<g filter="url(#${P}-glow)">
+<circle cx="332" cy="92" r="5.5" fill="#FFC9CE"/><circle cx="92" cy="208" r="4.5" fill="#FF2742"/>
+<circle cx="330" cy="210" r="5" fill="#FF8A94"/><circle cx="90" cy="92" r="4" fill="#FF2742"/>
+<circle cx="212" cy="20" r="4.5" fill="#FFC9CE"/><circle cx="208" cy="281" r="5" fill="#FF2742"/>
+</g>
+<circle cx="268" cy="52" r="1.6" fill="#FF9AA3" opacity=".8"/><circle cx="140" cy="252" r="1.6" fill="#FF9AA3" opacity=".7"/><circle cx="368" cy="160" r="1.4" fill="#FF6B78" opacity=".7"/>
+</svg>`;
+}
+function motifSVG(kind,w,h){
+const W=w||64,H=h||84;
+const inner={
+math:'<path d="M12 108 H92 M12 108 V16" opacity=".55"/><path d="M12 84 C 26 36, 44 36, 54 84 S 82 130, 92 58" fill="none"/><circle cx="54" cy="84" r="2.6" fill="currentColor" stroke="none"/><text x="60" y="26" font-family="IBM Plex Mono,monospace" font-size="9" fill="currentColor" stroke="none" opacity=".8">f(x)</text>',
+physics:'<path d="M10 112 H94" opacity=".55"/><path d="M12 110 Q 50 8 92 110" fill="none" stroke-dasharray="4 4"/><circle cx="51" cy="59" r="3" fill="currentColor" stroke="none"/><path d="M12 121 q 6 -8 12 0 t 12 0 t 12 0 t 12 0 t 12 0" fill="none" opacity=".55"/>',
+code:'<path d="M30 28 18 54 30 80" fill="none"/><path d="M70 28 82 54 70 80" fill="none"/><rect x="38" y="40" width="26" height="3.5" rx="1.75" fill="currentColor" stroke="none" opacity=".55"/><rect x="38" y="52" width="18" height="3.5" rx="1.75" fill="currentColor" stroke="none" opacity=".55"/><rect x="38" y="64" width="30" height="3.5" rx="1.75" fill="currentColor" stroke="none" opacity=".55"/>',
+engineering:'<rect x="34" y="46" width="32" height="32" rx="3" fill="none"/><path d="M42 46 V38 M50 46 V38 M58 46 V38 M42 78 V86 M50 78 V86 M58 78 V86" opacity=".7"/><path d="M10 22 H50 V38" fill="none" opacity=".6"/><path d="M90 104 H66 V86" fill="none" opacity=".6"/><circle cx="10" cy="22" r="2.4" fill="currentColor" stroke="none"/><circle cx="90" cy="104" r="2.4" fill="currentColor" stroke="none"/>',
+science:'<circle cx="50" cy="34" r="6.5" fill="none"/><circle cx="28" cy="70" r="5" fill="none"/><circle cx="72" cy="70" r="5" fill="none"/><circle cx="50" cy="100" r="4" fill="none"/><path d="M46 40 32 65 M54 40 68 65 M33 73 46 97 M67 73 54 97 M33 70 H67" opacity=".7"/>',
+research:'<rect x="20" y="16" width="46" height="60" rx="3" fill="none"/><path d="M28 30 H58 M28 40 H58 M28 50 H50 M28 60 H54" opacity=".6"/><rect x="54" y="96" width="7" height="18" fill="currentColor" stroke="none" opacity=".55"/><rect x="65" y="86" width="7" height="28" fill="currentColor" stroke="none" opacity=".7"/><rect x="76" y="100" width="7" height="14" fill="currentColor" stroke="none" opacity=".55"/>',
+data:'<rect x="16" y="24" width="68" height="72" rx="3" fill="none"/><path d="M16 44 H84 M16 64 H84 M16 84 H84 M50 44 V96" opacity=".55"/><circle cx="33" cy="54" r="2" fill="currentColor" stroke="none" opacity=".7"/><circle cx="67" cy="74" r="2" fill="currentColor" stroke="none" opacity=".7"/>',
+calculator:'<rect x="26" y="14" width="48" height="94" rx="5" fill="none"/><rect x="34" y="24" width="32" height="15" rx="2" fill="none" opacity=".7"/><circle cx="38" cy="54" r="2.6" fill="currentColor" stroke="none" opacity=".7"/><circle cx="50" cy="54" r="2.6" fill="currentColor" stroke="none" opacity=".7"/><circle cx="62" cy="54" r="2.6" fill="currentColor" stroke="none" opacity=".7"/><circle cx="38" cy="68" r="2.6" fill="currentColor" stroke="none" opacity=".7"/><circle cx="50" cy="68" r="2.6" fill="currentColor" stroke="none" opacity=".7"/><circle cx="62" cy="68" r="2.6" fill="currentColor" stroke="none" opacity=".7"/>',
+graph:'<path d="M12 108 H92 M12 108 V16" opacity=".55"/><path d="M12 96 34 66 52 80 70 38 90 52" fill="none"/><circle cx="34" cy="66" r="2.4" fill="currentColor" stroke="none"/><circle cx="70" cy="38" r="2.4" fill="currentColor" stroke="none"/><circle cx="90" cy="52" r="2.4" fill="currentColor" stroke="none"/>',
+reports:'<rect x="22" y="14" width="46" height="62" rx="3" fill="none"/><path d="M30 28 H60 M30 38 H60 M30 48 H52" opacity=".6"/><circle cx="72" cy="98" r="15" fill="none" opacity=".7"/><path d="M72 98 V83 A 15 15 0 0 1 85 105 Z" fill="currentColor" stroke="none" opacity=".45"/>'
+}[kind]||'';
+return `<svg width="${W}" height="${H}" viewBox="0 0 100 130" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${inner}</svg>`;
+}
+function heroSVG(kind){
+const defs=`<defs><linearGradient id="hg-r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6B78"/><stop offset="1" stop-color="#A50E26"/></linearGradient><radialGradient id="hg-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FF2742" stop-opacity=".35"/><stop offset="1" stop-color="#FF2742" stop-opacity="0"/></radialGradient><filter id="hg-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+const halo='<circle cx="130" cy="110" r="105" fill="url(#hg-halo)"/>';
+let body='';
+if(kind==='math')body=`<ellipse cx="130" cy="118" rx="98" ry="34" stroke="rgba(255,39,66,.35)" stroke-dasharray="4 6" transform="rotate(-14 130 118)"/><text x="130" y="168" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="150" fill="url(#hg-r)" filter="url(#hg-glow)">π</text><circle cx="208" cy="70" r="3" fill="#FFC9CE" filter="url(#hg-glow)"/><circle cx="48" cy="160" r="2.5" fill="#FF2742" filter="url(#hg-glow)"/>`;
+else if(kind==='physics')return atomSVG('ph',280,200);
+else if(kind==='code')body=`<g filter="url(#hg-glow)"><rect x="52" y="42" width="156" height="104" rx="8" stroke="url(#hg-r)" stroke-width="2.5" fill="rgba(255,39,66,.05)"/><path d="M30 168 H230 L214 146 H46 Z" stroke="url(#hg-r)" stroke-width="2.5" fill="rgba(255,39,66,.08)"/><text x="130" y="112" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="600" font-size="44" fill="#FF4D61">&lt;/&gt;</text></g><path d="M66 60 H120 M66 72 H96" stroke="rgba(255,154,163,.5)" stroke-width="2"/>`;
+else if(kind==='engineering')body=`<g filter="url(#hg-glow)" stroke="url(#hg-r)" fill="none"><circle cx="104" cy="96" r="40" stroke-width="12" stroke-dasharray="10 7"/><circle cx="104" cy="96" r="14" stroke-width="3"/><circle cx="176" cy="140" r="28" stroke-width="10" stroke-dasharray="8 6"/><circle cx="176" cy="140" r="10" stroke-width="3"/></g><circle cx="104" cy="96" r="4" fill="#FFC9CE" filter="url(#hg-glow)"/>`;
+else if(kind==='science')body=`<g filter="url(#hg-glow)" fill="none"><path d="M96 20 C 168 55, 92 90, 164 125 C 92 160, 168 195, 96 200" stroke="url(#hg-r)" stroke-width="3"/><path d="M164 20 C 92 55, 168 90, 96 125 C 168 160, 92 195, 164 200" stroke="url(#hg-r)" stroke-width="3"/></g><g stroke="rgba(255,201,206,.55)" stroke-width="1.6"><path d="M104 38 H156 M100 76 H160 M104 112 H156 M100 150 H160 M104 186 H156"/></g>`;
+else if(kind==='research')body=`<g filter="url(#hg-glow)"><path d="M58 150 130 128 202 150 130 172 Z" fill="rgba(255,39,66,.16)" stroke="url(#hg-r)" stroke-width="2"/><path d="M58 128 130 106 202 128 130 150 Z" fill="rgba(255,39,66,.22)" stroke="url(#hg-r)" stroke-width="2"/><path d="M58 106 130 84 202 106 130 128 Z" fill="rgba(255,39,66,.3)" stroke="url(#hg-r)" stroke-width="2"/><path d="M58 106 V150 M202 106 V150 M130 128 V172" stroke="url(#hg-r)" stroke-width="2"/></g><path d="M96 96 130 86 164 96" stroke="#FFC9CE" stroke-width="1.6" fill="none" opacity=".8"/>`;
+else if(kind==='data')body=`<g filter="url(#hg-glow)" stroke="url(#hg-r)" fill="none" stroke-width="1.8"><circle cx="130" cy="110" r="76"/><ellipse cx="130" cy="110" rx="76" ry="28"/><ellipse cx="130" cy="110" rx="76" ry="54"/><ellipse cx="130" cy="110" rx="28" ry="76"/><ellipse cx="130" cy="110" rx="54" ry="76"/></g><circle cx="176" cy="70" r="3" fill="#FFC9CE" filter="url(#hg-glow)"/><circle cx="86" cy="150" r="2.5" fill="#FF2742" filter="url(#hg-glow)"/>`;
+else if(kind==='calculator')body=`<g filter="url(#hg-glow)"><rect x="76" y="26" width="108" height="170" rx="12" stroke="url(#hg-r)" stroke-width="2.5" fill="rgba(255,39,66,.05)"/><rect x="92" y="44" width="76" height="28" rx="5" stroke="#FF8A94" stroke-width="1.8" fill="none"/></g><g fill="#FF4D61" filter="url(#hg-glow)"><circle cx="100" cy="98" r="5"/><circle cx="130" cy="98" r="5"/><circle cx="160" cy="98" r="5"/><circle cx="100" cy="128" r="5"/><circle cx="130" cy="128" r="5"/><circle cx="160" cy="128" r="5"/><circle cx="100" cy="158" r="5"/><circle cx="130" cy="158" r="5"/><rect x="152" y="150" width="16" height="26" rx="5"/></g>`;
+else if(kind==='graph')body=`<g filter="url(#hg-glow)" stroke="url(#hg-r)" fill="none" stroke-width="1.7"><path d="M30 150 C 70 120, 100 168, 130 128 C 160 92, 196 140, 232 108"/><path d="M30 168 C 70 140, 100 186, 130 148 C 160 112, 196 158, 232 128" opacity=".75"/><path d="M30 186 C 70 160, 100 200, 130 168 C 160 134, 196 176, 232 148" opacity=".5"/><path d="M30 132 C 70 100, 100 150, 130 108 C 160 72, 196 122, 232 88" opacity=".75"/><path d="M30 114 C 70 82, 100 132, 130 88 C 160 52, 196 104, 232 68" opacity=".5"/><path d="M30 114 V186 M80 96 V172 M130 88 V168 M180 96 V164 M232 68 V148" opacity=".4"/></g><circle cx="130" cy="88" r="3" fill="#FFC9CE" filter="url(#hg-glow)"/>`;
+else body=`<g filter="url(#hg-glow)"><path d="M78 26 H158 L186 54 V194 H78 Z" stroke="url(#hg-r)" stroke-width="2.5" fill="rgba(255,39,66,.05)"/><path d="M158 26 V54 H186" stroke="url(#hg-r)" stroke-width="2.5" fill="none"/></g><path d="M94 76 H166 M94 92 H166 M94 108 H146" stroke="rgba(255,154,163,.55)" stroke-width="2"/><g fill="#FF4D61" filter="url(#hg-glow)"><rect x="96" y="150" width="14" height="28" rx="2"/><rect x="118" y="136" width="14" height="42" rx="2"/><rect x="140" y="158" width="14" height="20" rx="2"/></g>`;
+return `<svg width="260" height="220" viewBox="0 0 260 220" fill="none" aria-hidden="true" focusable="false">${defs}${halo}${body}</svg>`;
+}
+
+/* ================= COMPONENTS ================= */
+function discTag(id){const d=DISC[id];if(!d)return '';return `<span class="tag" style="--h:${d.color}"><span class="dot"></span>${esc(d.label)}</span>`;}
+function statusChip(status,kind){const s=(kind==='exp'?ESTAT:PSTAT)[status];if(!s)return '';return `<span class="status" style="--sc:${s.color}"><span class="dot"></span>${esc(s.label)}</span>`;}
+function emptyStateHTML(o){return `<div class="empty ${o.slim?'slim':''}"><div class="empty-ic">${icon(o.icon||'inbox',18)}</div><p class="empty-title">${esc(o.title)}</p><p class="empty-text">${esc(o.text)}</p>${o.action||''}</div>`;}
+function secHead(idx,title,sub,actions){return `<header class="sec-head"><div class="sec-title-wrap"><span class="sec-idx mono">${idx} /</span><div><h2 class="sec-title">${esc(title)}</h2>${sub?`<p class="sec-sub">${esc(sub)}</p>`:''}</div></div>${actions?`<div class="ph-a">${actions}</div>`:''}</header>`;}
+function panelHead(idx,title,count,actions){return `<div class="panel-head"><div class="ph-t"><span class="ph-idx mono">${idx}</span><h2>${esc(title)}</h2>${count!=null?`<span class="count-chip">${count}</span>`:''}</div><div class="ph-a">${actions||''}</div></div>`;}
+
+/* ================= PROJECT LIST ================= */
+function filterProjects(scope){const f=ui[scope];let list=Store.state.projects.slice();if(f.status==='active')list=list.filter(p=>p.status!=='archived');else if(f.status!=='any')list=list.filter(p=>p.status===f.status);if(f.discipline!=='all')list=list.filter(p=>p.discipline===f.discipline);const q=norm(f.q);if(q)list=list.filter(p=>norm(p.name+' '+p.description+' '+DISC[p.discipline].label).includes(q));if(f.sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));else if(f.sort==='created')list.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt));else list.sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt));return list;}
+function projectToolbarHTML(scope,withArchived){const f=ui[scope];const statusOpts=[`<option value="active"${f.status==='active'?' selected':''}>All active</option>`,...['draft','in-progress','completed'].map(s=>`<option value="${s}"${f.status===s?' selected':''}>${PSTAT[s].label}</option>`),withArchived?`<option value="archived"${f.status==='archived'?' selected':''}>Archived</option>`:''].join('');
+return `<div class="list-toolbar"><div class="search-mini">${icon('search',14)}<input type="text" placeholder="Search projects…" value="${esc(f.q)}" data-filter="q" data-scope="${scope}" aria-label="Search projects"></div>
+<select class="filter" data-filter="discipline" data-scope="${scope}" aria-label="Filter by discipline"><option value="all"${f.discipline==='all'?' selected':''}>All disciplines</option>${DISCIPLINES.map(d=>`<option value="${d.id}"${f.discipline===d.id?' selected':''}>${esc(d.label)}</option>`).join('')}</select>
+<select class="filter" data-filter="status" data-scope="${scope}" aria-label="Filter by status">${statusOpts}</select>
+<select class="filter" data-filter="sort" data-scope="${scope}" aria-label="Sort projects"><option value="recent"${f.sort==='recent'?' selected':''}>Last modified</option><option value="name"${f.sort==='name'?' selected':''}>Name A–Z</option><option value="created"${f.sort==='created'?' selected':''}>Recently created</option></select>
+<span class="toolbar-count mono" data-count="${scope}"></span></div>`;}
+function projectRowsHTML(scope,limit){const all=Store.state.projects;
+if(all.length===0)return emptyStateHTML({icon:'folder',title:'No projects yet.',text:'Start your first scientific project and build your research workspace.',action:`<button type="button" class="btn btn-primary btn-sm" data-action="new-project">${icon('plus',14)}Create Project</button>`});
+let list=filterProjects(scope);const total=list.length;if(limit)list=list.slice(0,limit);
+if(total===0)return emptyStateHTML({icon:'search',slim:true,title:'No projects match your filters.',text:'Try a different query or reset the filters.',action:`<button type="button" class="btn btn-ghost btn-sm" data-action="reset-filters" data-scope="${scope}">Reset filters</button>`});
+const rows=list.map(p=>`<li class="data-row cols-project"><div class="row-main"><a class="row-name" href="#/projects/${p.id}">${esc(p.name)}</a><p class="row-desc" title="${esc(p.description)}">${esc(p.description||'No description')}</p></div>
+<div class="row-meta">${discTag(p.discipline)}${statusChip(p.status)}${timeHTML(p.updatedAt,'row-time')}</div>
+<div class="row-actions"><a class="btn-icon" href="#/projects/${p.id}" aria-label="Open ${esc(p.name)}" data-tip="Open project">${icon('arrow-up-right',15)}</a><button type="button" class="btn-icon" data-action="row-menu" data-kind="project" data-id="${p.id}" aria-label="Actions for ${esc(p.name)}" aria-haspopup="menu" aria-expanded="false">${icon('dots',15)}</button></div></li>`).join('');
+return `<ul style="list-style:none" data-total="${total}">${rows}</ul>`;}
+function projectListComponent(scope,opts){const withArchived=!!(opts&&opts.withArchived);const limit=opts&&opts.limit;const hasData=Store.state.projects.length>0;return `${hasData?projectToolbarHTML(scope,withArchived):''}<div data-list="${scope}">${projectRowsHTML(scope,limit)}</div>`;}
+function updateProjectList(scope){const el=$(`[data-list="${scope}"]`);if(!el)return;const limit=scope==='dash-projects'?6:0;el.innerHTML=projectRowsHTML(scope,limit);const list=$('ul',el);const total=list?+list.dataset.total:0;const shown=list?list.children.length:0;const cnt=$(`[data-count="${scope}"]`);if(cnt)cnt.textContent=total+(total===1?' result':' results');const foot=$(`[data-foot="${scope}"]`);if(foot)foot.textContent=`Showing ${shown} of ${total}`;}
+
+/* ================= ACTIVITY ================= */
+function activityDestination(a){if(!a.entityId||!a.entityType)return '';if(a.type.endsWith('.deleted'))return '';
+if(a.entityType==='project'&&Store.getProject(a.entityId))return `<a class="act-link" href="#/projects/${a.entityId}">OPEN →</a>`;
+if(a.entityType==='experiment'&&Store.getExperiment(a.entityId))return `<button type="button" class="act-link" data-action="open-experiment" data-id="${a.entityId}">OPEN →</button>`;
+if(a.entityType==='library'&&Store.getLibItem(a.entityId))return `<button type="button" class="act-link" data-action="open-library" data-id="${a.entityId}">OPEN →</button>`;return '';}
+function activityItemsHTML(items){return items.map(a=>{const m=ACT_META[a.type]||{icon:'clock',color:'#9A9AA6'};return `<div class="act-item"><span class="act-node" style="--ac:${m.color}">${icon(m.icon,13)}</span><div class="act-text">${esc(a.description)}<br>${activityDestination(a)}</div>${timeHTML(a.createdAt,'act-time')}</div>`;}).join('');}
+function activityFeedHTML(items,emptyText){if(!items.length)return emptyStateHTML({icon:'history',slim:true,title:'No activity yet.',text:emptyText||'Actions you take — creating projects, saving experiments — will be recorded here.'});return `<div class="act-list">${activityItemsHTML(items)}</div>`;}
+
+/* ================= OVERVIEW ================= */
+function donutHTML(){const projects=Store.state.projects;const total=projects.length;
+if(!total)return emptyStateHTML({icon:'chart',slim:true,title:'No projects yet',text:'Create a project to see the discipline distribution.'});
+const counts=DISCIPLINES.map(d=>({...d,n:projects.filter(p=>p.discipline===d.id).length})).filter(d=>d.n>0);
+const R=54,C=2*Math.PI*R;let off=0;
+const segs=counts.map(d=>{const len=d.n/total*C,gap=Math.min(4,len*.18);const s=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${d.color}" stroke-width="14" stroke-dasharray="${(len-gap).toFixed(2)} ${(C-len+gap).toFixed(2)}" stroke-dashoffset="${(-off-gap/2).toFixed(2)}" transform="rotate(-90 70 70)"><title>${esc(d.label)}: ${d.n}</title></circle>`;off+=len;return s;}).join('');
+const summary='Projects by discipline: '+counts.map(d=>`${d.label} ${d.n}`).join(', ')+`. Total ${total}.`;
+const legend=counts.map(d=>`<div class="legend-row" style="--h:${d.color}"><span class="legend-sw"></span><span class="legend-name">${esc(d.label)}</span><span class="legend-n">${d.n}</span><span class="legend-pct">${Math.round(d.n/total*100)}%</span></div>`).join('');
+return `<div class="ov-donut"><svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="${esc(summary)}"><title>${esc(summary)}</title><circle r="${R}" cx="70" cy="70" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="14"/>${segs}<text x="70" y="68" text-anchor="middle" class="donut-num">${total}</text><text x="70" y="84" text-anchor="middle" class="donut-cap">PROJECTS</text></svg><div class="legend">${legend}</div></div>`;}
+function overviewBodyHTML(){const s=Store.state;
+if(!s.projects.length&&!s.experiments.length)return emptyStateHTML({icon:'chart',title:'No scientific data yet.',text:'Create a project or record an experiment to start building your overview.',action:`<button type="button" class="btn btn-primary btn-sm" data-action="new-project">${icon('plus',14)}Create Project</button>`});
+const active=s.projects.filter(p=>p.status!=='archived').length;
+const expCounts=DISCIPLINES.map(d=>({...d,n:s.experiments.filter(e=>e.discipline===d.id).length})).filter(d=>d.n>0);
+const expTotal=s.experiments.length;
+const bars=expCounts.length?expCounts.map(d=>`<div class="bar-row" style="--h:${d.color}"><span class="bar-name">${esc(d.label)}</span><span class="bar-track"><span class="bar-fill" style="width:${Math.round(d.n/expTotal*100)}%"></span></span><span class="bar-n">${d.n}</span></div>`).join(''):'<p class="help-prose">No experiments recorded yet.</p>';
+const recency={};[...s.projects,...s.experiments].forEach(r=>{const t=Date.parse(r.updatedAt);if(!recency[r.discipline]||t>recency[r.discipline])recency[r.discipline]=t;});
+const recent=Object.entries(recency).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id,t])=>`<span class="tag" style="--h:${DISC[id].color}"><span class="dot"></span>${esc(DISC[id].label)} · ${esc(relTime(new Date(t).toISOString()))}</span>`).join('');
+return `<div class="ov-grid"><div><p class="mono-label">Projects by discipline</p>${donutHTML()}</div>
+<div class="ov-right"><div class="ov-totals"><div class="ov-total"><b>${s.projects.length}</b><span>Saved projects</span></div><div class="ov-total"><b>${active}</b><span>Active</span></div><div class="ov-total"><b>${expTotal}</b><span>Experiments</span></div><div class="ov-total"><b>${s.library.length}</b><span>Library items</span></div></div>
+<div><p class="mono-label">Experiments by discipline</p>${bars}</div>
+<div><p class="mono-label">Recently active disciplines</p><div class="ov-recent">${recent||'<span class="help-prose">—</span>'}</div></div></div></div>`;}
+
+/* ================= DASHBOARD ================= */
+function quickStatsHTML(){const s=Store.state;const counts=DISCIPLINES.map(d=>({...d,n:s.projects.filter(p=>p.discipline===d.id).length}));const max=Math.max(1,...counts.map(c=>c.n));const has=s.projects.length>0;
+const summary=counts.map(c=>`${c.label} ${c.n}`).join(', ');
+return `<div class="qs-body">
+<div class="stat-row"><span class="stat-num">${s.projects.length}</span><span class="stat-label">Projects</span></div>
+<div class="stat-row"><span class="stat-num">${s.experiments.length}</span><span class="stat-label">Experiments</span></div>
+<div class="stat-row"><span class="stat-num">${s.library.length}</span><span class="stat-label">Library items</span></div>
+${has?`<div class="mini-bars" role="img" aria-label="Projects by discipline: ${esc(summary)}">${counts.map(c=>`<span class="mini-bar${c.n?'':' zero'}" style="--h:${c.color};height:${c.n?Math.max(8,Math.round(c.n/max*56)):3}px" title="${esc(c.label)}: ${c.n}"></span>`).join('')}</div>
+<div class="mini-labels">${counts.map(c=>`<span title="${esc(c.label)}">${c.short}</span>`).join('')}</div>`
+:`<p class="qs-empty">No records yet. Create a project and the discipline distribution will appear here.</p>`}
+</div>`;}
+function welcomeHTML(){const s=Store.state;const active=s.projects.filter(p=>p.status!=='archived').length;const last=s.activity[0];
+return `<section class="welcome" aria-labelledby="welcome-h">
+<span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+<div class="welcome-viz">${atomSVG('w')}</div>
+<div class="welcome-inner">
+<span class="pill"><span class="dot"></span>Unified Scientific Workspace</span>
+<h1 id="welcome-h">Welcome to<br><span class="accent">SIMULAB</span></h1>
+<p class="welcome-sub">Your unified environment for scientific exploration, experimentation and discovery.</p>
+<div class="welcome-actions">
+<button type="button" class="btn btn-primary" data-action="new-project">Create New Project ${icon('arrow-right',15)}</button>
+<button type="button" class="btn btn-secondary" data-action="open-workspace">${icon('folder',15)}Open Workspace</button>
+<button type="button" class="btn btn-ghost" data-action="explore-modules">${icon('grid',15)}Explore Modules</button>
+</div>
+<div class="telemetry">
+<div><div class="tele-label">Date</div><div class="tele-value"><small>${esc(fmtLongDate(new Date()))}</small></div></div>
+<div><div class="tele-label">Active projects</div><div class="tele-value">${active}</div></div>
+<div><div class="tele-label">Last activity</div><div class="tele-value"><small>${last?timeHTML(last.createdAt):'No activity yet'}</small></div></div>
+</div>
+</div>
+</section>`;}
+function moduleCardHTML(m){return `<a class="module-card" href="#/${m.route}" aria-label="${esc(m.name)} — planned module">
+<span class="mc-idx mono">${m.idx}</span>
+<span class="mc-icon">${icon(m.icon,19)}</span>
+<h3 class="mc-name">${esc(m.name)}</h3>
+<p class="mc-desc">${esc(m.desc)}</p>
+<div class="mc-motif">${motifSVG(m.motif)}</div>
+<div class="mc-foot"><span class="card-cta">Open ${icon('arrow-right',13)}</span><span class="mc-status">Planned</span></div>
+</a>`;}
+function quickLaunchHTML(){return `<div class="ql-list">${QUICK_LAUNCH.map(t=>`<a class="ql-item" href="#/${t.route}"><span class="ql-ic">${icon(t.icon,15)}</span><span class="ql-txt"><span class="ql-name">${esc(t.name)}</span><span class="ql-desc">${esc(t.desc)}</span></span><span class="status" style="--sc:#5F5F6B"><span class="dot"></span>Planned</span>${icon('chevron-right',14)}</a>`).join('')}</div>`;}
+function expPreviewHTML(){const list=Store.state.experiments.slice().sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)).slice(0,4);
+if(!list.length)return emptyStateHTML({icon:'flask',slim:true,title:'No experiments yet.',text:'Record your first experiment to track runs and results.',action:`<button type="button" class="btn btn-secondary btn-sm" data-action="new-experiment">${icon('plus',13)}Create Experiment</button>`});
+return list.map(e=>{const p=e.projectId?Store.getProject(e.projectId):null;return `<div class="lib-row" style="--h:${DISC[e.discipline].color}"><span class="lib-cat-ic">${icon('flask',13)}</span><div class="lib-row-main"><button type="button" class="row-name" data-action="open-experiment" data-id="${e.id}">${esc(e.title)}</button><p class="row-sub">${esc(DISC[e.discipline].label)} · ${p?esc(p.name):'Unlinked'} · ${ESTAT[e.status].label}</p></div>${timeHTML(e.updatedAt,'row-time')}</div>`;}).join('');}
+function libPreviewHTML(){const list=Store.state.library.slice().sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)).slice(0,4);
+if(!list.length)return emptyStateHTML({icon:'library',slim:true,title:'Your library is empty.',text:'Save formulas, notes and references to build your research collection.',action:`<button type="button" class="btn btn-secondary btn-sm" data-action="new-library">${icon('plus',13)}Add Item</button>`});
+return list.map(l=>{const c=LIBCAT[l.category];return `<div class="lib-row" style="--h:${c.color}"><span class="lib-cat-ic">${icon(c.icon,13)}</span><div class="lib-row-main"><button type="button" class="row-name" data-action="open-library" data-id="${l.id}">${esc(l.title)}</button><p class="row-sub">${esc(c.label)}</p></div>${timeHTML(l.updatedAt,'row-time')}</div>`;}).join('');}
+function footerStripHTML(){const s=Store.state;const n=s.projects.length+s.experiments.length+s.library.length;return `<div class="footer-strip"><span>SIMULAB v1.0.0 · Local-first workspace</span><span>${n} records · storage: ${Store.storageOk?'local':'memory'} · schema v${SCHEMA_VERSION}</span></div>`;}
+function DashboardView(){const s=Store.state;const activeCount=s.projects.filter(p=>p.status!=='archived').length;
+return `
+<div class="hero-grid reveal">
+${welcomeHTML()}
+<aside class="hero-rail">
+<section class="panel" aria-label="Quick stats">${panelHead('QS','Quick Stats')}${quickStatsHTML()}</section>
+<section class="panel rail-act" aria-label="Recent activity">${panelHead('RA','Recent Activity',null,`<a class="link-more" href="#/activity">VIEW ALL ${icon('arrow-right',12)}</a>`)}${activityFeedHTML(s.activity.slice(0,5))}</section>
+</aside>
+</div>
+<section class="reveal" style="animation-delay:50ms" id="modules" aria-labelledby="mods-h">
+${secHead('01','Scientific Modules','Explore specialized environments for every stage of scientific work.')}
+<div class="modules-grid">${MODULES.map(moduleCardHTML).join('')}</div>
+</section>
+<div class="grid-main reveal" style="animation-delay:95ms">
+<section class="panel" aria-label="My active projects">
+${panelHead('02','My Active Projects',activeCount,`<button type="button" class="btn-icon" data-action="new-project" aria-label="New project" data-tip="New project">${icon('plus',16)}</button><a class="link-more" href="#/projects">VIEW ALL ${icon('arrow-right',12)}</a>`)}
+${projectListComponent('dash-projects',{limit:6})}
+${s.projects.length?`<div class="panel-foot"><span data-foot="dash-projects">Showing ${Math.min(6,activeCount)} of ${activeCount}</span><a class="link-more" href="#/projects">ALL PROJECTS ${icon('arrow-right',12)}</a></div>`:''}
+</section>
+<section class="panel" aria-label="Quick launch">${panelHead('03','Quick Launch')}${quickLaunchHTML()}</section>
+</div>
+<div class="grid-secondary reveal" style="animation-delay:140ms">
+<section class="panel" aria-label="Recent experiments">${panelHead('04','Recent Experiments',s.experiments.length,`<button type="button" class="btn-icon" data-action="new-experiment" aria-label="New experiment" data-tip="New experiment">${icon('plus',16)}</button><a class="link-more" href="#/experiments">ALL ${icon('arrow-right',12)}</a>`)}${expPreviewHTML()}</section>
+<section class="panel" aria-label="My library">${panelHead('05','My Library',s.library.length,`<button type="button" class="btn-icon" data-action="new-library" aria-label="New library item" data-tip="New library item">${icon('plus',16)}</button><a class="link-more" href="#/library">ALL ${icon('arrow-right',12)}</a>`)}${libPreviewHTML()}</section>
+</div>
+<section class="panel reveal" style="animation-delay:185ms;margin-top:14px" aria-label="Scientific overview">${panelHead('06','Scientific Overview')}${overviewBodyHTML()}</section>
+${footerStripHTML()}`;}
+
+/* ================= PAGES ================= */
+function ProjectsView(){return `<div class="page-head reveal"><div><h1>Projects</h1><p class="page-sub">All research projects in this workspace, including archived ones.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-action="new-project">${icon('plus',15)}New Project</button></div></div>
+<section class="panel reveal" style="animation-delay:45ms">${panelHead('P.01','Project registry',Store.state.projects.length)}${projectListComponent('page-projects',{withArchived:true})}</section>${footerStripHTML()}`;}
+function ProjectDetailView(id){const p=Store.getProject(id);
+if(!p)return `<div class="nf"><div class="nf-code">404</div><h1>Project not found</h1><p class="page-sub" style="margin-top:8px">This project may have been deleted or the link is out of date.</p><a class="btn btn-primary" href="#/projects">${icon('arrow-left',15)}Back to Projects</a></div>`;
+const exps=Store.state.experiments.filter(e=>e.projectId===id);const libs=Store.state.library.filter(l=>l.projectId===id);const acts=Store.state.activity.filter(a=>a.entityType==='project'&&a.entityId===id).slice(0,8);const archived=p.status==='archived';
+const statusOpts=PROJECT_STATUSES.filter(s=>s.id!=='archived').map(s=>`<option value="${s.id}"${p.status===s.id?' selected':''}>${s.label}</option>`).join('');
+return `<a class="back-link" href="#/projects">${icon('arrow-left',12)} PROJECTS</a>
+${archived?`<div class="archived-banner">${icon('archive',15)} This project is archived. It is hidden from active summaries but can be restored at any time.</div>`:''}
+<div class="detail-head reveal"><div style="min-width:0"><h1 class="detail-title">${esc(p.name)}</h1><div class="detail-chips">${discTag(p.discipline)}${statusChip(p.status)}<span class="count-chip mono">${esc(TPL[p.template].label)}</span></div></div>
+<div class="detail-actions">${!archived?`<select class="filter" data-change="project-status" data-id="${p.id}" aria-label="Project status">${statusOpts}</select>`:''}
+<button type="button" class="btn btn-secondary btn-sm" data-action="edit-project" data-id="${p.id}">${icon('pencil',13)}Edit</button>
+${archived?`<button type="button" class="btn btn-secondary btn-sm" data-action="restore-project" data-id="${p.id}">${icon('restore',13)}Restore</button>`:`<button type="button" class="btn btn-secondary btn-sm" data-action="archive-project" data-id="${p.id}">${icon('archive',13)}Archive</button>`}
+<button type="button" class="btn btn-danger btn-sm" data-action="delete-project" data-id="${p.id}">${icon('trash',13)}Delete</button></div></div>
+<div class="detail-grid reveal" style="animation-delay:45ms">
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+<section class="panel">${panelHead('D.01','Description')}<div class="panel-body"><p class="prose">${esc(p.description||'No description provided.')}</p></div></section>
+<section class="panel">${panelHead('D.02','Experiments',exps.length,`<button type="button" class="btn btn-secondary btn-sm" data-action="new-experiment" data-project="${p.id}">${icon('plus',13)}New Experiment</button>`)}
+${exps.length?`<ul style="list-style:none">${exps.map(e=>`<li class="data-row" style="grid-template-columns:minmax(0,1fr) 96px 78px 62px"><div class="row-main"><button type="button" class="row-name" data-action="open-experiment" data-id="${e.id}">${esc(e.title)}</button><p class="row-desc">${esc(e.notes?e.notes.slice(0,90):'No notes')}</p></div><div class="row-meta">${statusChip(e.status,'exp')}${timeHTML(e.updatedAt,'row-time')}</div><div class="row-actions"><button type="button" class="btn-icon" data-action="open-experiment" data-id="${e.id}" aria-label="Open ${esc(e.title)}">${icon('arrow-up-right',15)}</button><button type="button" class="btn-icon" data-action="row-menu" data-kind="experiment" data-id="${e.id}" aria-label="Actions for ${esc(e.title)}" aria-haspopup="menu" aria-expanded="false">${icon('dots',15)}</button></div></li>`).join('')}</ul>`
+:emptyStateHTML({icon:'flask',slim:true,title:'No experiments linked.',text:'Record an experiment and link it to this project.',action:`<button type="button" class="btn btn-secondary btn-sm" data-action="new-experiment" data-project="${p.id}">${icon('plus',13)}Create Experiment</button>`})}</section>
+<section class="panel">${panelHead('D.03','Library records',libs.length,`<button type="button" class="btn btn-secondary btn-sm" data-action="new-library" data-category="note" data-project="${p.id}">${icon('plus',13)}Add Note</button>`)}
+${libs.length?libs.map(l=>{const c=LIBCAT[l.category];return `<div class="lib-row" style="--h:${c.color}"><span class="lib-cat-ic">${icon(c.icon,13)}</span><div class="lib-row-main"><button type="button" class="row-name" data-action="open-library" data-id="${l.id}">${esc(l.title)}</button><p class="row-sub">${esc(c.label)}</p></div>${timeHTML(l.updatedAt,'row-time')}</div>`;}).join('')
+:emptyStateHTML({icon:'library',slim:true,title:'No library records linked.',text:'Notes, formulas and references linked to this project appear here.'})}</section>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+<section class="panel">${panelHead('D.04','Metadata')}<div class="panel-body"><dl class="meta-list"><dt>Created</dt><dd>${timeHTML(p.createdAt)}</dd><dt>Updated</dt><dd>${timeHTML(p.updatedAt)}</dd><dt>Last opened</dt><dd>${p.lastOpenedAt?timeHTML(p.lastOpenedAt):'—'}</dd><dt>Template</dt><dd>${esc(TPL[p.template].label)}</dd><dt>ID</dt><dd class="mono" style="font-size:11px">${esc(p.id)} <button type="button" class="btn-icon" data-action="copy-id" data-id="${p.id}" aria-label="Copy project ID" data-tip="Copy ID">${icon('copy',12)}</button></dd></dl></div></section>
+<section class="panel">${panelHead('D.05','Project activity')}${activityFeedHTML(acts,'Actions on this project will appear here.')}</section>
+<div class="detail-note">${icon('info',15)}<div>Lab tools are not part of this dashboard release. When the scientific modules ship, their instruments will attach to this project. For now the workspace stores its records, notes and metadata.<div class="module-mini-row">${MODULES.map(m=>`<span class="module-mini" data-tip="${esc(m.name)} · Planned">${icon(m.icon,13)}</span>`).join('')}</div></div></div>
+</div></div>${footerStripHTML()}`;}
+function filterExperiments(){const f=ui['page-experiments'];let list=Store.state.experiments.slice();if(f.status!=='all')list=list.filter(e=>e.status===f.status);if(f.discipline!=='all')list=list.filter(e=>e.discipline===f.discipline);const q=norm(f.q);if(q)list=list.filter(e=>norm(e.title+' '+e.notes+' '+DISC[e.discipline].label).includes(q));if(f.sort==='name')list.sort((a,b)=>a.title.localeCompare(b.title));else if(f.sort==='created')list.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt));else list.sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt));return list;}
+function expRowsHTML(){if(!Store.state.experiments.length)return emptyStateHTML({icon:'flask',title:'No experiments yet.',text:'Record your first experiment to track hypotheses, runs and results across projects.',action:`<button type="button" class="btn btn-primary btn-sm" data-action="new-experiment">${icon('plus',14)}Create Experiment</button>`});
+const list=filterExperiments();
+if(!list.length)return emptyStateHTML({icon:'search',slim:true,title:'No experiments match your filters.',text:'Try a different query or reset the filters.',action:`<button type="button" class="btn btn-ghost btn-sm" data-action="reset-filters" data-scope="page-experiments">Reset filters</button>`});
+return `<ul style="list-style:none" data-total="${list.length}">${list.map(e=>{const p=e.projectId?Store.getProject(e.projectId):null;return `<li class="data-row cols-exp"><div class="row-main"><button type="button" class="row-name" data-action="open-experiment" data-id="${e.id}">${esc(e.title)}</button><p class="row-desc">${esc(e.notes?e.notes.slice(0,110):'No notes recorded')}</p></div><div class="row-meta">${discTag(e.discipline)}<span class="row-sub">${p?`<a href="#/projects/${p.id}" style="text-decoration:underline;text-underline-offset:3px">${esc(p.name)}</a>`:'Unlinked'}</span>${statusChip(e.status,'exp')}${timeHTML(e.updatedAt,'row-time')}</div><div class="row-actions"><button type="button" class="btn-icon" data-action="open-experiment" data-id="${e.id}" aria-label="Open ${esc(e.title)}" data-tip="Open details">${icon('arrow-up-right',15)}</button><button type="button" class="btn-icon" data-action="row-menu" data-kind="experiment" data-id="${e.id}" aria-label="Actions for ${esc(e.title)}" aria-haspopup="menu" aria-expanded="false">${icon('dots',15)}</button></div></li>`;}).join('')}</ul>`;}
+function ExperimentsView(){const f=ui['page-experiments'];const has=Store.state.experiments.length>0;
+return `<div class="page-head reveal"><div><h1>Experiments</h1><p class="page-sub">Recorded runs and investigations across your projects. Records store metadata and notes — simulations arrive with the lab modules.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-action="new-experiment">${icon('plus',15)}New Experiment</button></div></div>
+<section class="panel reveal" style="animation-delay:45ms">${panelHead('E.01','Experiment records',Store.state.experiments.length)}
+${has?`<div class="list-toolbar"><div class="search-mini">${icon('search',14)}<input type="text" placeholder="Search experiments…" value="${esc(f.q)}" data-filter="q" data-scope="page-experiments" aria-label="Search experiments"></div>
+<select class="filter" data-filter="discipline" data-scope="page-experiments" aria-label="Filter by discipline"><option value="all"${f.discipline==='all'?' selected':''}>All disciplines</option>${DISCIPLINES.map(d=>`<option value="${d.id}"${f.discipline===d.id?' selected':''}>${esc(d.label)}</option>`).join('')}</select>
+<select class="filter" data-filter="status" data-scope="page-experiments" aria-label="Filter by status"><option value="all"${f.status==='all'?' selected':''}>All statuses</option>${EXP_STATUSES.map(s=>`<option value="${s.id}"${f.status===s.id?' selected':''}>${s.label}</option>`).join('')}</select>
+<select class="filter" data-filter="sort" data-scope="page-experiments" aria-label="Sort experiments"><option value="recent"${f.sort==='recent'?' selected':''}>Last modified</option><option value="name"${f.sort==='name'?' selected':''}>Name A–Z</option><option value="created"${f.sort==='created'?' selected':''}>Recently created</option></select>
+<span class="toolbar-count mono" data-count="page-experiments"></span></div>`:''}
+<div data-list="page-experiments">${expRowsHTML()}</div></section>${footerStripHTML()}`;}
+function libGridHTML(){const f=ui['page-library'];const q=norm(f.q);
+if(f.cat==='experiments'){let exps=Store.state.experiments.slice();if(q)exps=exps.filter(e=>norm(e.title+' '+e.notes).includes(q));exps.sort((a,b)=>f.sort==='name'?a.title.localeCompare(b.title):Date.parse(b.updatedAt)-Date.parse(a.updatedAt));
+if(!exps.length)return emptyStateHTML({icon:'flask',slim:true,title:'No experiment records.',text:'Experiments you record will be listed here as part of your library.',action:`<button type="button" class="btn btn-secondary btn-sm" data-action="new-experiment">${icon('plus',13)}Create Experiment</button>`});
+return `<div class="lib-grid" data-total="${exps.length}">${exps.map(e=>`<button type="button" class="lib-card" style="--h:#FF2742" data-action="open-experiment" data-id="${e.id}"><div class="lib-card-top"><span class="lib-cat-ic">${icon('flask',14)}</span>${statusChip(e.status,'exp')}</div><span class="lib-title">${esc(e.title)}</span><span class="lib-excerpt">${esc(e.notes||DISC[e.discipline].label)}</span><div class="lib-meta"><span class="lib-cat-label">Experiment</span>${timeHTML(e.updatedAt,'row-time')}</div></button>`).join('')}</div>`;}
+let items=Store.state.library.slice();if(f.cat!=='all')items=items.filter(l=>l.category===f.cat);if(q)items=items.filter(l=>norm(l.title+' '+l.content).includes(q));items.sort((a,b)=>f.sort==='name'?a.title.localeCompare(b.title):Date.parse(b.updatedAt)-Date.parse(a.updatedAt));
+if(!Store.state.library.length)return emptyStateHTML({icon:'library',title:'Your library is empty.',text:'Save formulas, notes, references and documents to build your research collection.',action:`<button type="button" class="btn btn-primary btn-sm" data-action="new-library">${icon('plus',14)}Add Item</button>`});
+if(!items.length)return emptyStateHTML({icon:'search',slim:true,title:'Nothing matches.',text:'Try a different query or category.',action:`<button type="button" class="btn btn-ghost btn-sm" data-action="reset-filters" data-scope="page-library">Reset filters</button>`});
+return `<div class="lib-grid" data-total="${items.length}">${items.map(l=>{const c=LIBCAT[l.category];return `<div class="lib-card" style="--h:${c.color};cursor:pointer" data-action="open-library" data-id="${l.id}" role="button" tabindex="0"><div class="lib-card-top"><span class="lib-cat-ic">${icon(c.icon,14)}</span><button type="button" class="btn-icon" style="width:26px;height:26px" data-action="row-menu" data-kind="library" data-id="${l.id}" aria-label="Actions for ${esc(l.title)}" aria-haspopup="menu" aria-expanded="false">${icon('dots',14)}</button></div><span class="lib-title">${esc(l.title)}</span><span class="lib-excerpt">${esc(l.content||'Empty item')}</span><div class="lib-meta"><span class="lib-cat-label">${esc(c.label)}</span>${timeHTML(l.updatedAt,'row-time')}</div></div>`;}).join('')}</div>`;}
+function LibraryView(){const f=ui['page-library'];const s=Store.state;
+const chips=[{id:'all',label:'All items',n:s.library.length},...LIB_CATEGORIES.map(c=>({id:c.id,label:c.label+'s',n:s.library.filter(l=>l.category===c.id).length})),{id:'experiments',label:'Experiments',n:s.experiments.length}];
+return `<div class="page-head reveal"><div><h1>Library</h1><p class="page-sub">Formulas, notes, references and documents you have saved. Everything here is a real record stored in this browser.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-action="new-library">${icon('plus',15)}New Item</button></div></div>
+<section class="panel reveal" style="animation-delay:45ms">${panelHead('L.01','Saved records',s.library.length+s.experiments.length)}
+<div class="chips-row" role="group" aria-label="Library categories">${chips.map(c=>`<button type="button" class="chip-btn${f.cat===c.id?' active':''}" data-action="lib-chip" data-cat="${c.id}" aria-pressed="${f.cat===c.id}">${esc(c.label)} <span class="mono">${c.n}</span></button>`).join('')}</div>
+<div class="list-toolbar"><div class="search-mini">${icon('search',14)}<input type="text" placeholder="Search library…" value="${esc(f.q)}" data-filter="q" data-scope="page-library" aria-label="Search library"></div>
+<select class="filter" data-filter="sort" data-scope="page-library" aria-label="Sort library"><option value="recent"${f.sort==='recent'?' selected':''}>Last modified</option><option value="name"${f.sort==='name'?' selected':''}>Name A–Z</option></select>
+<span class="toolbar-count mono" data-count="page-library"></span></div>
+<div data-list="page-library">${libGridHTML()}</div></section>${footerStripHTML()}`;}
+function activityPageHTML(){const f=ui['page-activity'];let items=Store.state.activity.slice();if(f.type!=='all')items=items.filter(a=>a.type.startsWith(f.type+'.'));
+if(!items.length)return emptyStateHTML({icon:'history',title:'No activity recorded.',text:'Creating projects, saving experiments and library records will build this audit trail.',action:`<button type="button" class="btn btn-primary btn-sm" data-action="new-project">${icon('plus',14)}Create Project</button>`});
+const groups=[];items.forEach(a=>{const day=new Date(a.createdAt).toDateString();let g=groups[groups.length-1];if(!g||g.day!==day){g={day,label:fmtDate(a.createdAt),items:[]};groups.push(g);}g.items.push(a);});
+return `<div class="act-list" data-total="${items.length}">${groups.map(g=>`<div class="act-day">${esc(g.label)}</div>${activityItemsHTML(g.items)}`).join('')}</div>`;}
+function ActivityView(){const f=ui['page-activity'];
+return `<div class="page-head reveal"><div><h1>Activity</h1><p class="page-sub">A local audit trail of actions in this workspace. The latest ${ACTIVITY_CAP} events are kept.</p></div>
+<div class="page-actions"><select class="filter" data-filter="type" data-scope="page-activity" aria-label="Filter activity"><option value="all"${f.type==='all'?' selected':''}>All types</option><option value="project"${f.type==='project'?' selected':''}>Projects</option><option value="experiment"${f.type==='experiment'?' selected':''}>Experiments</option><option value="library"${f.type==='library'?' selected':''}>Library</option><option value="data"${f.type==='data'?' selected':''}>Data & system</option></select>
+${Store.state.activity.length?`<button type="button" class="btn btn-ghost btn-sm" data-action="clear-activity">${icon('trash',13)}Clear history</button>`:''}</div></div>
+<section class="panel reveal" style="animation-delay:45ms">${panelHead('A.01','Event log',Store.state.activity.length)}<div data-list="page-activity">${activityPageHTML()}</div></section>${footerStripHTML()}`;}
+function switchHTML(pref,labelId){const on=!!Store.state.prefs[pref];return `<button type="button" class="switch" role="switch" aria-checked="${on}" aria-labelledby="${labelId}" data-action="pref-toggle" data-pref="${pref}"><span class="knob"></span></button>`;}
+function SettingsView(){const s=Store.state;const size=fmtBytes(new Blob([JSON.stringify(s)]).size);
+return `<div class="page-head reveal"><div><h1>Settings</h1><p class="page-sub">Preferences and data management for this browser workspace. Everything applies immediately and persists locally.</p></div></div>
+<div class="settings-stack">
+<section class="panel reveal" style="animation-delay:40ms">${panelHead('S.01','Appearance & behavior')}
+<div class="set-row"><div class="set-info"><div class="set-title" id="lbl-sb">Collapsed sidebar</div><div class="set-desc">Show icon-only navigation on desktop. Tooltips keep every destination labeled.</div></div>${switchHTML('sidebarCollapsed','lbl-sb')}</div>
+<div class="set-row"><div class="set-info"><div class="set-title" id="lbl-rm">Reduce motion</div><div class="set-desc">Minimize interface animation. Your system-level reduced-motion preference is always respected as well.</div></div>${switchHTML('reduceMotion','lbl-rm')}</div>
+<div class="set-row"><div class="set-info"><div class="set-title" id="lbl-tf">Timestamps</div><div class="set-desc">How dates display across activity feeds and records. Exact date-time is always available on hover.</div></div>
+<select class="filter" data-pref-change="timeFormat" aria-labelledby="lbl-tf"><option value="relative"${s.prefs.timeFormat==='relative'?' selected':''}>Relative (2h ago)</option><option value="absolute"${s.prefs.timeFormat==='absolute'?' selected':''}>Absolute date-time</option></select></div></section>
+<section class="panel reveal" style="animation-delay:80ms">${panelHead('S.02','Data & storage')}
+<div class="set-row"><div class="set-info"><div class="set-title">Storage mode</div><div class="set-desc">${Store.storageOk?'Records persist in this browser via localStorage. There is no cloud sync and no account — data never leaves this device unless you export it.':'localStorage is unavailable in this context. Changes are kept in memory for this session only — export a backup before closing the tab.'}</div></div>
+<span class="storage-chip ${Store.storageOk?'storage-ok':'storage-warn'}">${icon(Store.storageOk?'check-circle':'alert',12)}${Store.storageOk?'LOCAL STORAGE':'MEMORY ONLY'}</span></div>
+<div class="set-row"><div class="set-info"><div class="set-title">Workspace size</div><div class="set-desc">${s.projects.length} projects · ${s.experiments.length} experiments · ${s.library.length} library items · ${s.activity.length} activity events</div></div><span class="set-mono">${size}</span></div>
+<div class="set-row"><div class="set-info"><div class="set-title">Export backup</div><div class="set-desc">Download projects, experiments, library items and activity as a JSON file.</div></div><button type="button" class="btn btn-secondary btn-sm" data-action="export-data">${icon('download',13)}Download JSON</button></div>
+<div class="set-row"><div class="set-info"><div class="set-title">Import backup</div><div class="set-desc">Restore a SIMULAB JSON backup. Records are validated first, then replace current data after your confirmation. Preferences are kept.</div></div><button type="button" class="btn btn-secondary btn-sm" data-action="import-data">${icon('upload',13)}Choose file</button><input type="file" id="import-file" accept=".json,application/json" hidden></div>
+<div class="set-row"><div class="set-info"><div class="set-title" style="color:var(--error)">Reset workspace</div><div class="set-desc">Permanently delete every record from this browser. Preferences are kept. Export a backup first if you need one.</div></div><button type="button" class="btn btn-danger btn-sm" data-action="reset-workspace">${icon('trash',13)}Reset…</button></div></section>
+<section class="panel reveal" style="animation-delay:120ms">${panelHead('S.03','About')}<div class="panel-body"><p class="help-prose">SIMULAB v1.0.0 — a local-first unified scientific research environment. This release includes the dashboard, project management, experiment records and library. The six scientific modules and instrument tools are planned. See the <a href="#/help">Help Center</a> for shortcuts and the roadmap.</p></div></section>
+</div>${footerStripHTML()}`;}
+function HelpView(){const k=isMac?'⌘ K':'Ctrl K';
+return `<div class="page-head reveal"><div><h1>Help Center</h1><p class="page-sub">Guides, shortcuts and answers about this workspace.</p></div></div>
+<div class="help-grid">
+<section class="panel help-block reveal" style="animation-delay:40ms"><h2>${icon('zap',16)}Start here</h2>
+<div class="help-step"><span class="step-n">1</span><div><b>Create a project.</b> Pick a discipline and a template — templates add an honest starter outline to your library, nothing more.</div></div>
+<div class="help-step"><span class="step-n">2</span><div><b>Record experiments.</b> Experiments are metadata + notes records linked to projects. Simulations arrive with the lab modules.</div></div>
+<div class="help-step"><span class="step-n">3</span><div><b>Save library items.</b> Formulas, research notes, references and documents build your collection.</div></div>
+<div class="help-step"><span class="step-n">4</span><div><b>Review the overview.</b> Every chart and counter on the dashboard is derived from your real records — nothing is fabricated.</div></div></section>
+<section class="panel help-block reveal" style="animation-delay:80ms"><h2>${icon('command',16)}Keyboard shortcuts</h2>
+<div class="sc-row"><span>Open global search</span><kbd class="kbd">${k}</kbd></div>
+<div class="sc-row"><span>Move through results</span><span><kbd class="kbd">↑</kbd> <kbd class="kbd">↓</kbd></span></div>
+<div class="sc-row"><span>Open selected result</span><kbd class="kbd">Enter</kbd></div>
+<div class="sc-row"><span>Close overlay / menu / drawer</span><kbd class="kbd">Esc</kbd></div>
+<div class="sc-row"><span>Move focus</span><kbd class="kbd">Tab</kbd></div></section>
+<section class="panel help-block reveal" style="animation-delay:120ms"><h2>${icon('database',16)}Your data</h2>
+<p class="help-prose">All records live in this browser's localStorage under a versioned schema. There is <b style="color:var(--text-1)">no account and no cloud sync</b> — clearing browser data clears the workspace. Use <a href="#/settings">Settings → Data & storage</a> to export a JSON backup, import one, or reset. Invalid stored records are repaired gracefully instead of wiping everything.</p></section>
+<section class="panel help-block reveal" style="animation-delay:160ms"><h2>${icon('orbit',16)}Module roadmap</h2>
+${[...MODULES,...TOOLS].map(m=>`<a class="roadmap-item" href="#/${m.route}">${icon(m.icon,15)}<span>${esc(m.name)}</span><span class="status" style="--sc:#5F5F6B"><span class="dot"></span>Planned</span></a>`).join('')}</section>
+</div>${footerStripHTML()}`;}
+function PlaceholderView(m){const isModule=MODULES.some(x=>x.route===m.route);
+return `<a class="back-link" href="#/dashboard">${icon('arrow-left',12)} DASHBOARD</a>
+<div class="ph-grid reveal">
+<div><div class="ph-status-row"><span class="ph-kicker mono">${isModule?'Module':'Instrument'} ${m.idx} — ${esc(DISC[m.discipline].label)}</span><span class="pill"><span class="dot"></span>Planned</span></div>
+<h1 class="ph-name">${esc(m.name)}</h1>
+<p class="ph-desc">${esc(m.desc)}</p>
+<p class="ph-note">The ${esc(m.name)} tools are not part of this dashboard release. This destination is reserved so navigation, search and project links remain stable as the platform grows. No instruments or simulations are available here yet.</p>
+<div class="caps"><p class="mono-label">Planned capabilities</p><div class="caps-list">${m.caps.map(c=>`<div class="cap-item">${icon('chevron-right',13)}${esc(c)}</div>`).join('')}</div></div>
+<div class="ph-actions"><a class="btn btn-secondary" href="#/dashboard">${icon('arrow-left',15)}Back to Dashboard</a><button type="button" class="btn btn-primary" data-action="new-project" data-discipline="${m.discipline}">${icon('plus',15)}Create related project</button></div></div>
+<div class="ph-viz"><span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>${heroSVG(m.motif)}</div>
+</div>${footerStripHTML()}`;}
+function NotFoundView(path){return `<div class="nf reveal"><div class="nf-code">404</div><h1>Route not found</h1><p class="page-sub" style="margin-top:8px">This destination does not exist in the current release.</p><span class="nf-path">#/${esc(path)}</span><a class="btn btn-primary" href="#/dashboard">${icon('arrow-left',15)}Back to Dashboard</a></div>`;}
+
+/* ================= TOOLTIP / TOAST ================= */
+const Tooltip={timer:null,el:null,init(){this.el=$('#tooltip');},
+schedule(t){this.cancel();this.timer=setTimeout(()=>this.show(t),350);},
+show(t){const tip=t.dataset.tip;if(!tip||!this.el)return;const el=this.el;el.textContent=tip;el.hidden=false;el.style.visibility='hidden';const r=t.getBoundingClientRect(),tw=el.offsetWidth,th=el.offsetHeight;const inSb=t.closest('.sidebar')&&$('#app').classList.contains('sb-collapsed')&&innerWidth>1023;let left,top;if(inSb){left=r.right+10;top=r.top+r.height/2-th/2;}else{left=r.left+r.width/2-tw/2;top=r.top-th-8;if(top<6)top=r.bottom+8;}left=Math.max(6,Math.min(left,innerWidth-tw-6));top=Math.max(6,Math.min(top,innerHeight-th-6));el.style.left=left+'px';el.style.top=top+'px';el.style.visibility='visible';},
+cancel(){if(this.timer){clearTimeout(this.timer);this.timer=null;}},hide(){this.cancel();if(this.el)this.el.hidden=true;}};
+function toast(message,opts){opts=opts||{};const type=opts.type||'success';const meta=NOTIF_META[type]||NOTIF_META.info;const root=$('#toast-root');const el=document.createElement('div');el.className='toast';el.style.setProperty('--tc',meta.color);el.setAttribute('role',type==='error'?'alert':'status');
+el.innerHTML=`${icon(meta.icon,16)}<div class="toast-msg"></div>${opts.actionLabel?'<button type="button" class="toast-act"></button>':''}<button type="button" class="toast-x" aria-label="Dismiss">${icon('x',13)}</button>`;
+$('.toast-msg',el).textContent=message;let timer=null;
+const dismiss=()=>{if(timer)clearTimeout(timer);el.classList.add('hide');setTimeout(()=>el.remove(),200);};
+if(opts.actionLabel){const b=$('.toast-act',el);b.textContent=opts.actionLabel;b.addEventListener('click',()=>{dismiss();if(opts.onAction)opts.onAction();});}
+$('.toast-x',el).addEventListener('click',dismiss);
+root.appendChild(el);while(root.children.length>4)root.firstChild.remove();
+requestAnimationFrame(()=>el.classList.add('show'));timer=setTimeout(dismiss,opts.actionLabel?8000:4200);}
+
+/* ================= POPOVER / MODAL / DRAWER ================= */
+const Popover={el:null,anchor:null,kind:null,outside:null,onKey:null,onFocusOut:null,onScroll:null,
+open(anchor,html,opts){opts=opts||{};if(this.anchor===anchor){this.close(true);return;}this.close();
+const root=$('#popover-root');root.innerHTML=`<div class="popover" ${opts.role==='menu'?'role="menu"':'role="dialog"'} ${opts.label?`aria-label="${esc(opts.label)}"`:''} data-popover="${opts.kind||''}">${html}</div>`;
+const el=root.firstElementChild;this.el=el;this.anchor=anchor;this.kind=opts.kind||null;anchor.setAttribute('aria-expanded','true');
+const width=opts.width||el.offsetWidth;el.style.width=width+'px';const r=anchor.getBoundingClientRect();
+let left=opts.align==='start'?r.left:r.right-width;left=Math.max(8,Math.min(left,innerWidth-width-8));el.style.left=left+'px';
+let top=r.bottom+8;const h=el.offsetHeight;if(top+h>innerHeight-8){const above=r.top-h-8;top=above>8?above:Math.max(8,innerHeight-h-8);}
+el.style.top=top+'px';el.style.maxHeight=(innerHeight-top-8)+'px';el.style.overflowY='auto';
+requestAnimationFrame(()=>el.classList.add('open'));
+this.outside=e=>{if(!el.contains(e.target)&&!anchor.contains(e.target))this.close();};
+setTimeout(()=>document.addEventListener('pointerdown',this.outside),0);
+this.onKey=e=>{const items=$$('[role="menuitem"]:not(:disabled)',el);if(!items.length)return;const i=items.indexOf(document.activeElement);if(e.key==='ArrowDown'){e.preventDefault();items[(i+1)%items.length].focus();}else if(e.key==='ArrowUp'){e.preventDefault();items[(i-1+items.length)%items.length].focus();}else if(e.key==='Home'){e.preventDefault();items[0].focus();}else if(e.key==='End'){e.preventDefault();items[items.length-1].focus();}};
+el.addEventListener('keydown',this.onKey);
+this.onFocusOut=e=>{if(e.relatedTarget&&!el.contains(e.relatedTarget)&&e.relatedTarget!==anchor)this.close();};
+el.addEventListener('focusout',this.onFocusOut);
+this.onScroll=e=>{if(!el.contains(e.target))this.close();};
+window.addEventListener('scroll',this.onScroll,true);
+const first=$('[role="menuitem"]:not(:disabled)',el)||$('button:not(:disabled), a[href]',el);if(first)first.focus();},
+update(html){if(this.el)this.el.innerHTML=html;},
+close(refocus){if(!this.el)return;document.removeEventListener('pointerdown',this.outside);window.removeEventListener('scroll',this.onScroll,true);if(this.anchor){this.anchor.setAttribute('aria-expanded','false');if(refocus&&this.anchor.isConnected)this.anchor.focus();}$('#popover-root').innerHTML='';this.el=null;this.anchor=null;this.kind=null;}};
+const Modal={isOpen:false,el:null,opener:null,
+open(opts){if(this.isOpen)this.close();this.opener=document.activeElement;this.isOpen=true;lockScroll();
+const root=$('#modal-root');root.innerHTML=`<div class="modal-scrim"><div class="modal ${opts.size==='sm'?'sm':''}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title">${esc(opts.title)}</h2><button type="button" class="btn-icon" data-action="modal-close" aria-label="Close dialog">${icon('x',16)}</button></div>${opts.body}</div></div>`;
+this.el=$('.modal',root);$('.modal-scrim',root).addEventListener('pointerdown',e=>{if(e.target===e.currentTarget)this.close();});
+if(opts.onMount)opts.onMount(this.el);
+const target=$('[data-autofocus]',this.el)||$('input,select,textarea,button',this.el);if(target)target.focus();},
+close(){if(!this.isOpen)return;this.isOpen=false;$('#modal-root').innerHTML='';this.el=null;unlockScroll();if(this.opener&&this.opener.isConnected)this.opener.focus();this.opener=null;}};
+function confirmDialog(o){Modal.open({title:o.title,size:'sm',body:`<div class="modal-body"><p class="confirm-msg">${o.message}</p></div><div class="modal-foot"><button type="button" class="btn btn-secondary" data-action="modal-close" data-autofocus>Cancel</button><button type="button" class="btn ${o.danger===false?'btn-primary':'btn-danger-solid'}" id="confirm-ok">${esc(o.confirmLabel||'Confirm')}</button></div>`,onMount(el){$('#confirm-ok',el).addEventListener('click',()=>{Modal.close();o.onConfirm();});}});}
+const Drawer={isOpen:false,el:null,opener:null,kind:null,id:null,
+open(opts){const same=this.isOpen&&this.kind===opts.kind&&this.id===opts.id;if(!same){if(this.isOpen)this.close();this.opener=document.activeElement;this.isOpen=true;lockScroll();}
+this.kind=opts.kind;this.id=opts.id;const root=$('#drawer-root');
+root.innerHTML=`<div class="drawer-scrim"></div><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title"><div class="drawer-head"><h2 id="drawer-title">${esc(opts.title)}</h2><button type="button" class="btn-icon" data-action="drawer-close" aria-label="Close details">${icon('x',16)}</button></div><div class="drawer-body">${opts.body}</div>${opts.foot?`<div class="drawer-foot">${opts.foot}</div>`:''}</aside>`;
+this.el=$('.drawer',root);$('.drawer-scrim',root).addEventListener('pointerdown',()=>this.close());
+const f=$('button,a[href]',this.el);if(f)f.focus();},
+close(){if(!this.isOpen)return;this.isOpen=false;$('#drawer-root').innerHTML='';this.el=null;this.kind=null;this.id=null;unlockScroll();if(this.opener&&this.opener.isConnected)this.opener.focus();this.opener=null;}};
+function openExperimentDrawer(id){const e=Store.getExperiment(id);if(!e){toast('This experiment no longer exists.',{type:'info'});return;}
+const p=e.projectId?Store.getProject(e.projectId):null;
+Drawer.open({kind:'experiment',id,title:e.title,body:`<div class="drawer-meta">${statusChip(e.status,'exp')}${discTag(e.discipline)}</div>
+<dl class="meta-list"><dt>Project</dt><dd>${p?`<a href="#/projects/${p.id}" style="text-decoration:underline;text-underline-offset:3px">${esc(p.name)}</a>`:'Not linked'}</dd><dt>Created</dt><dd>${timeHTML(e.createdAt)}</dd><dt>Updated</dt><dd>${timeHTML(e.updatedAt)}</dd><dt>ID</dt><dd class="mono" style="font-size:11px">${esc(e.id)}</dd></dl>
+<div class="drawer-section"><p class="mono-label">Notes</p><p class="prose">${esc(e.notes||'No notes recorded.')}</p></div>`,
+foot:`<button type="button" class="btn btn-secondary" data-action="edit-experiment" data-id="${e.id}">${icon('pencil',14)}Edit</button><button type="button" class="btn btn-danger" data-action="delete-experiment" data-id="${e.id}">${icon('trash',14)}Delete</button>`});}
+function openLibraryDrawer(id){const l=Store.getLibItem(id);if(!l){toast('This library item no longer exists.',{type:'info'});return;}
+const c=LIBCAT[l.category];const p=l.projectId?Store.getProject(l.projectId):null;
+Drawer.open({kind:'library',id,title:l.title,body:`<div class="drawer-meta"><span class="tag" style="--h:${c.color}"><span class="dot"></span>${esc(c.label)}</span></div>
+<dl class="meta-list"><dt>Project</dt><dd>${p?`<a href="#/projects/${p.id}" style="text-decoration:underline;text-underline-offset:3px">${esc(p.name)}</a>`:'Not linked'}</dd><dt>Saved</dt><dd>${timeHTML(l.createdAt)}</dd><dt>Updated</dt><dd>${timeHTML(l.updatedAt)}</dd></dl>
+<div class="drawer-section"><p class="mono-label">${l.category==='formula'?'Expression':'Content'}</p>${l.category==='formula'?`<code class="formula-block">${esc(l.content||'—')}</code>`:`<p class="prose">${esc(l.content||'Empty item.')}</p>`}</div>
+${l.category==='formula'?'<p class="field-hint" style="margin-top:10px">Expressions are stored as text. Evaluation arrives with Math Lab.</p>':''}`,
+foot:`<button type="button" class="btn btn-secondary" data-action="edit-library" data-id="${l.id}">${icon('pencil',14)}Edit</button><button type="button" class="btn btn-danger" data-action="delete-library" data-id="${l.id}">${icon('trash',14)}Delete</button>`});}
+
+/* ================= MENUS ================= */
+function notificationsPanelHTML(){const list=Store.state.notifications;const unread=list.filter(n=>!n.read).length;
+const items=list.length?list.map(n=>{const m=NOTIF_META[n.type];return `<button type="button" class="notif-item" data-action="notif-item" data-id="${n.id}" style="--nc:${m.color}"><span class="notif-ic">${icon(m.icon,13)}</span><span><span class="notif-title">${esc(n.title)}${!n.read?'<span class="unread-dot" aria-label="unread"></span>':''}</span>${n.body?`<span class="notif-body">${esc(n.body)}</span>`:''}<span class="notif-time">${esc(timeLabel(n.createdAt))}</span></span></button>`;}).join(''):emptyStateHTML({icon:'bell',slim:true,title:'No notifications.',text:'Real system events — saves, exports, storage issues — will appear here.'});
+return `<div class="notif-panel"><div class="notif-head"><b>Notifications</b>${unread?`<span class="count-chip">${unread} unread</span>`:''}</div><div class="notif-list">${items}</div>${list.length?`<div class="notif-foot">${unread?`<button type="button" class="btn btn-ghost btn-sm" data-action="notif-mark-all">${icon('check',13)}Mark all read</button>`:''}<button type="button" class="btn btn-ghost btn-sm" data-action="notif-clear">${icon('trash',13)}Clear all</button></div>`:''}</div>`;}
+function refreshNotifications(){if(Popover.kind==='notifications')Popover.update(notificationsPanelHTML());}
+function openNotifications(anchor){Popover.open(anchor,notificationsPanelHTML(),{kind:'notifications',width:344,align:'end',label:'Notifications'});}
+function openProfile(anchor){Popover.open(anchor,`<div class="menu"><div class="menu-head"><span class="avatar">${icon('user',15)}</span><div><b>Local Profile</b><i>No account · data stays in this browser</i></div></div>
+<a class="menu-item" role="menuitem" href="#/settings">${icon('settings',15)}Settings</a>
+<a class="menu-item" role="menuitem" href="#/help">${icon('help',15)}Help Center</a>
+<button type="button" class="menu-item" role="menuitem" data-action="open-about">${icon('info',15)}About SIMULAB</button>
+<div class="menu-sep"></div><button type="button" class="menu-item" role="menuitem" data-action="export-data">${icon('download',15)}Export backup</button></div>`,{role:'menu',width:264,align:'end'});}
+function openWorkspaceMenu(anchor){const recent=Store.state.projects.filter(p=>p.status!=='archived').sort((a,b)=>Date.parse(b.lastOpenedAt||b.updatedAt)-Date.parse(a.lastOpenedAt||a.updatedAt)).slice(0,4);
+Popover.open(anchor,`<div class="menu"><a class="menu-item" role="menuitem" href="#/dashboard">${icon('orbit',15)}<span class="mi-txt">Research Workspace<span class="mi-sub">Default context</span></span></a>
+<div class="menu-sep"></div><div class="menu-label">Recent projects</div>
+${recent.length?recent.map(p=>`<a class="menu-item" role="menuitem" href="#/projects/${p.id}">${icon('folder',15)}<span class="mi-txt truncate">${esc(p.name)}<span class="mi-sub">${esc(DISC[p.discipline].label)}</span></span></a>`).join(''):`<button type="button" class="menu-item" role="menuitem" disabled>${icon('folder',15)}<span class="mi-txt">No projects yet<span class="mi-sub">Create one to build your workspace</span></span></button>`}
+<div class="menu-sep"></div><a class="menu-item" role="menuitem" href="#/projects">${icon('library',15)}View all projects</a>
+<button type="button" class="menu-item" role="menuitem" data-action="new-project">${icon('plus',15)}New project</button></div>`,{role:'menu',width:270,align:'end'});}
+function openQuickCreate(anchor){Popover.open(anchor,`<div class="menu"><div class="menu-label">Create</div>
+<button type="button" class="menu-item" role="menuitem" data-action="new-project">${icon('folder',15)}<span class="mi-txt">New Project<span class="mi-sub">Start a research workspace</span></span></button>
+<button type="button" class="menu-item" role="menuitem" data-action="new-experiment">${icon('flask',15)}<span class="mi-txt">New Experiment<span class="mi-sub">Record a run or investigation</span></span></button>
+<button type="button" class="menu-item" role="menuitem" data-action="new-library" data-category="note">${icon('note',15)}<span class="mi-txt">New Research Note<span class="mi-sub">Save to your library</span></span></button>
+<button type="button" class="menu-item" role="menuitem" disabled aria-disabled="true">${icon('chart',15)}<span class="mi-txt">New Graph<span class="mi-sub">Requires Graph Studio · Planned</span></span></button></div>`,{role:'menu',width:264,align:'end'});}
+function openRowMenu(anchor,kind,id){let html='';
+if(kind==='project'){const p=Store.getProject(id);if(!p)return;
+html=`<div class="menu"><a class="menu-item" role="menuitem" href="#/projects/${p.id}">${icon('arrow-up-right',15)}Open project</a>
+<button type="button" class="menu-item" role="menuitem" data-action="edit-project" data-id="${id}">${icon('pencil',15)}Edit details</button><div class="menu-sep"></div>
+${p.status==='archived'?`<button type="button" class="menu-item" role="menuitem" data-action="restore-project" data-id="${id}">${icon('restore',15)}Restore</button>`:`<button type="button" class="menu-item" role="menuitem" data-action="archive-project" data-id="${id}">${icon('archive',15)}Archive</button>`}
+<button type="button" class="menu-item danger" role="menuitem" data-action="delete-project" data-id="${id}">${icon('trash',15)}Delete…</button></div>`;}
+else if(kind==='experiment'){html=`<div class="menu"><button type="button" class="menu-item" role="menuitem" data-action="open-experiment" data-id="${id}">${icon('arrow-up-right',15)}Open details</button><button type="button" class="menu-item" role="menuitem" data-action="edit-experiment" data-id="${id}">${icon('pencil',15)}Edit</button><div class="menu-sep"></div><button type="button" class="menu-item danger" role="menuitem" data-action="delete-experiment" data-id="${id}">${icon('trash',15)}Delete…</button></div>`;}
+else{html=`<div class="menu"><button type="button" class="menu-item" role="menuitem" data-action="open-library" data-id="${id}">${icon('arrow-up-right',15)}Open</button><button type="button" class="menu-item" role="menuitem" data-action="edit-library" data-id="${id}">${icon('pencil',15)}Edit</button><div class="menu-sep"></div><button type="button" class="menu-item danger" role="menuitem" data-action="delete-library" data-id="${id}">${icon('trash',15)}Delete…</button></div>`;}
+Popover.open(anchor,html,{role:'menu',width:212,align:'end'});}
+function openAbout(){const s=Store.state;
+Modal.open({title:'About SIMULAB',size:'sm',body:`<div class="modal-body"><div style="display:flex;align-items:center;gap:12px">${LOGO_SVG}<div><b style="font:700 16px var(--font-disp);letter-spacing:.12em">SIMULAB</b><div class="mono" style="font-size:10px;color:var(--text-3)">v1.0.0 · SCHEMA v${SCHEMA_VERSION}</div></div></div>
+<p class="help-prose" style="margin-top:14px">A unified scientific research environment. This release ships the dashboard, project lifecycle, experiment records and library. All data is local to this browser — no account, no cloud sync.</p>
+<div class="about-stats"><div class="about-stat"><b>${s.projects.length}</b><span>Projects</span></div><div class="about-stat"><b>${s.experiments.length}</b><span>Experiments</span></div><div class="about-stat"><b>${s.library.length}</b><span>Library</span></div></div></div>
+<div class="modal-foot"><button type="button" class="btn btn-secondary" data-action="export-data">${icon('download',14)}Export backup</button><button type="button" class="btn btn-primary" data-action="modal-close">Close</button></div>`});}
+
+/* ================= SEARCH ================= */
+const NAV_SEARCH=[
+{route:'dashboard',label:'Dashboard',icon:'dashboard',sub:'Page',kw:'home overview'},
+{route:'projects',label:'Projects',icon:'folder',sub:'Page',kw:'workspace registry'},
+{route:'experiments',label:'Experiments',icon:'flask',sub:'Page',kw:'records runs'},
+{route:'library',label:'Library',icon:'library',sub:'Page',kw:'formulas notes references documents'},
+{route:'activity',label:'Activity',icon:'history',sub:'Page',kw:'audit log events'},
+{route:'settings',label:'Settings',icon:'settings',sub:'Page',kw:'preferences export import storage'},
+{route:'help',label:'Help Center',icon:'help',sub:'Page',kw:'shortcuts guide roadmap'},
+...[...MODULES,...TOOLS].map(m=>({route:m.route,label:m.name,icon:m.icon,sub:'Module · Planned',kw:m.desc})),
+...QUICK_LAUNCH.map(t=>({route:t.route,label:t.name,icon:t.icon,sub:'Tool · Planned',kw:t.desc}))
+];
+const Search={isOpen:false,opener:null,q:'',results:[],active:0,panel:null,input:null,
+open(){if(this.isOpen||Modal.isOpen||Drawer.isOpen)return;this.isOpen=true;this.opener=document.activeElement;lockScroll();this.q='';this.active=0;const k=isMac?'⌘ K':'Ctrl K';
+$('#search-root').innerHTML=`<div class="search-scrim"></div><div class="search-panel" role="dialog" aria-modal="true" aria-label="Global search">
+<div class="search-input-row">${icon('search',17)}<input id="search-input" type="text" role="combobox" aria-expanded="true" aria-controls="search-list" aria-autocomplete="list" placeholder="Search projects, experiments, library, tools…" autocomplete="off" spellcheck="false">
+<button type="button" class="btn-icon" style="width:28px;height:28px" data-action="search-clear" aria-label="Clear search" hidden id="search-clear-btn">${icon('x',14)}</button><kbd class="kbd">esc</kbd></div>
+<div class="search-results" id="search-list" role="listbox" aria-label="Search results"></div>
+<div class="search-foot"><span><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> navigate</span><span><kbd class="kbd">↵</kbd> open</span><span style="margin-left:auto">${k}</span></div></div>`;
+this.panel=$('.search-panel');this.input=$('#search-input');
+$('.search-scrim').addEventListener('pointerdown',()=>this.close());
+this.input.addEventListener('input',()=>{this.q=this.input.value;this.render();});
+this.panel.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();this.move(1);}else if(e.key==='ArrowUp'){e.preventDefault();this.move(-1);}else if(e.key==='Enter'&&(e.target===this.input||e.target.classList.contains('sr-opt'))){e.preventDefault();this.openResult(this.active);}});
+this.panel.addEventListener('pointermove',e=>{const opt=e.target.closest('.sr-opt');if(opt&&+opt.dataset.idx!==this.active){this.active=+opt.dataset.idx;this.paintActive(false);}});
+this.render();this.input.focus();},
+compute(){const q=norm(this.q);
+if(!q){const recent=Store.state.recentSearches.map(s=>({kind:'recent',q:s,label:s,sub:'Recent search',icon:'history'}));const jump=NAV_SEARCH.slice(0,7).map(n=>({kind:'nav',...n}));return [{label:'Recent searches',items:recent},{label:'Jump to',items:jump}].filter(g=>g.items.length);}
+const groups=[];
+const proj=Store.state.projects.filter(p=>norm(p.name+' '+p.description+' '+DISC[p.discipline].label).includes(q)).slice(0,6).map(p=>({kind:'project',id:p.id,label:p.name,sub:`${DISC[p.discipline].label} · ${PSTAT[p.status].label}`,icon:'folder',hue:DISC[p.discipline].color}));
+if(proj.length)groups.push({label:'Projects',items:proj});
+const exps=Store.state.experiments.filter(e=>norm(e.title+' '+e.notes).includes(q)).slice(0,6).map(e=>({kind:'experiment',id:e.id,label:e.title,sub:`${DISC[e.discipline].label} · ${ESTAT[e.status].label}`,icon:'flask',hue:'#FF2742'}));
+if(exps.length)groups.push({label:'Experiments',items:exps});
+const libs=Store.state.library.filter(l=>norm(l.title+' '+l.content).includes(q)).slice(0,6).map(l=>({kind:'library',id:l.id,label:l.title,sub:LIBCAT[l.category].label,icon:LIBCAT[l.category].icon,hue:LIBCAT[l.category].color}));
+if(libs.length)groups.push({label:'Library',items:libs});
+const nav=NAV_SEARCH.filter(n=>norm(n.label+' '+n.kw).includes(q));const seen=new Set();const navD=[];nav.forEach(n=>{const key=n.route+n.label;if(!seen.has(key)){seen.add(key);navD.push({kind:'nav',...n});}});
+if(navD.length)groups.push({label:'Navigation',items:navD.slice(0,8)});
+return groups;},
+render(){const groups=this.compute();this.results=[];const list=$('#search-list');$('#search-clear-btn').hidden=!this.q;
+const typeLabel={project:'Project',experiment:'Experiment',library:'Library',nav:'Go to',recent:'Recent'};
+if(!norm(this.q)&&!groups.length){list.innerHTML=`<div class="search-empty"><p>Type to search across projects, experiments, library and tools.<br>Future modules appear as navigation destinations, marked as planned.</p></div>`;this.input.removeAttribute('aria-activedescendant');return;}
+if(norm(this.q)&&!groups.length){const short=this.q.trim().slice(0,30);list.innerHTML=`<div class="search-empty"><p>No matches for “${esc(this.q.trim())}”.</p><button type="button" class="btn btn-secondary btn-sm" data-action="search-create-project">${icon('plus',13)}Create project “${esc(short)}”</button></div>`;this.input.removeAttribute('aria-activedescendant');return;}
+let idx=0;
+list.innerHTML=groups.map(g=>`<div class="sr-group">${esc(g.label)}</div>`+g.items.map(r=>{const i=idx++;this.results.push(r);return `<button type="button" class="sr-opt" role="option" id="sr-opt-${i}" data-idx="${i}" data-action="search-result" aria-selected="false" ${r.hue?`style="--h:${r.hue}"`:''}><span class="sr-ic">${icon(r.icon,14)}</span><span style="min-width:0"><span class="sr-label">${esc(r.label)}</span><span class="sr-sub">${esc(r.sub)}</span></span><span class="sr-type">${typeLabel[r.kind]||''}</span></button>`;}).join('')).join('');
+this.active=0;this.paintActive(false);},
+paintActive(scroll){$$('.sr-opt',this.panel).forEach(el=>{const on=+el.dataset.idx===this.active;el.classList.toggle('active',on);el.setAttribute('aria-selected',on?'true':'false');if(on){this.input.setAttribute('aria-activedescendant',el.id);if(scroll)el.scrollIntoView({block:'nearest'});}});},
+move(d){if(!this.results.length)return;this.active=(this.active+d+this.results.length)%this.results.length;this.paintActive(true);},
+setQuery(q){this.q=q;this.input.value=q;this.render();this.input.focus();},
+openResult(i){const r=this.results[i];if(!r)return;if(r.kind==='recent'){this.setQuery(r.q);return;}if(this.q.trim())Store.addRecentSearch(this.q.trim());this.close();
+if(r.kind==='project')location.hash='#/projects/'+r.id;
+else if(r.kind==='experiment')openExperimentDrawer(r.id);
+else if(r.kind==='library')openLibraryDrawer(r.id);
+else if(r.kind==='nav'){if(location.hash==='#/'+r.route)renderRoute();else location.hash='#/'+r.route;}},
+close(){if(!this.isOpen)return;this.isOpen=false;$('#search-root').innerHTML='';this.panel=null;this.input=null;unlockScroll();if(this.opener&&this.opener.isConnected)this.opener.focus();this.opener=null;}};
+
+/* ================= FORMS ================= */
+function fieldErr(id,msg){const input=$('#'+id),err=$('#'+id+'-err');if(!input||!err)return;if(msg){input.setAttribute('aria-invalid','true');err.innerHTML=`${icon('alert-circle',12)}<span></span>`;$('span',err).textContent=msg;err.hidden=false;}else{input.removeAttribute('aria-invalid');err.hidden=true;}}
+function projectOptionsHTML(selected){const opts=Store.state.projects.filter(p=>p.status!=='archived').map(p=>`<option value="${p.id}"${selected===p.id?' selected':''}>${esc(p.name)}</option>`).join('');return `<option value=""${!selected?' selected':''}>Not linked</option>`+opts;}
+function openProjectForm(opts){opts=opts||{};const edit=opts.project?Store.getProject(opts.project):null;if(opts.project&&!edit){toast('This project no longer exists.',{type:'info'});return;}
+const v=edit||{name:opts.presetName||'',discipline:opts.presetDiscipline||'mathematics',description:'',template:'blank',status:'draft'};const isEdit=!!edit;
+Modal.open({title:isEdit?'Edit project':'Create new project',body:`<form id="project-form" novalidate><div class="modal-body">
+<div class="field"><label for="pf-name">Project name <span class="mono" data-count-for="pf-name">${v.name.length}/80</span></label>
+<input id="pf-name" type="text" maxlength="80" value="${esc(v.name)}" placeholder="e.g. Pendulum Period Study" data-counter="80" data-autofocus aria-describedby="pf-name-err" required><p class="field-err" id="pf-name-err" hidden></p></div>
+<div class="form-row"><div class="field"><label for="pf-disc">Scientific discipline</label>
+<select id="pf-disc" aria-describedby="pf-disc-err">${DISCIPLINES.map(d=>`<option value="${d.id}"${v.discipline===d.id?' selected':''}>${esc(d.label)}</option>`).join('')}</select><p class="field-err" id="pf-disc-err" hidden></p></div>
+${isEdit?`<div class="field"><label for="pf-status">Status</label><select id="pf-status">${PROJECT_STATUSES.map(s=>`<option value="${s.id}"${v.status===s.id?' selected':''}>${s.label}</option>`).join('')}</select></div>`
+:`<div class="field"><label for="pf-template">Template</label><select id="pf-template" aria-describedby="pf-tpl-hint">${TEMPLATES.map(t=>`<option value="${t.id}"${v.template===t.id?' selected':''}>${esc(t.label)}</option>`).join('')}</select><p class="field-hint" id="pf-tpl-hint">${esc(TPL[v.template].hint)}</p></div>`}</div>
+<div class="field"><label for="pf-desc">Description <span class="mono" data-count-for="pf-desc">${v.description.length}/400</span></label>
+<textarea id="pf-desc" maxlength="400" data-counter="400" placeholder="What is this project investigating?">${esc(v.description)}</textarea></div>
+<div class="form-info">${icon('info',14)}<span>${isEdit?'Saving updates the modified timestamp and records an activity entry.':'New projects start as Draft. Lab tools will be attachable once the scientific modules ship — templates only add honest starter notes.'}</span></div></div>
+<div class="modal-foot"><button type="button" class="btn btn-secondary" data-action="modal-close">Cancel</button><button type="submit" class="btn btn-primary" id="pf-submit">${icon(isEdit?'check':'plus',14)}${isEdit?'Save Changes':'Create Project'}</button></div></form>`,
+onMount(el){let busy=false,discTouched=isEdit;const disc=$('#pf-disc',el),tpl=$('#pf-template',el);
+disc.addEventListener('change',()=>{discTouched=true;});
+if(tpl)tpl.addEventListener('change',()=>{const t=TPL[tpl.value];$('#pf-tpl-hint',el).textContent=t.hint;if(!discTouched&&t.discipline)disc.value=t.discipline;});
+$('#project-form',el).addEventListener('submit',e=>{e.preventDefault();if(busy)return;
+const name=$('#pf-name',el).value.trim();const description=$('#pf-desc',el).value.trim();const discipline=disc.value;const template=tpl?tpl.value:v.template;let firstBad=null;
+fieldErr('pf-name',!name?'Project name is required.':name.length>80?'Keep the name under 80 characters.':'');if(!name||name.length>80)firstBad=firstBad||$('#pf-name',el);
+fieldErr('pf-disc',DISC_IDS.includes(discipline)?'':'Choose a valid discipline.');if(!DISC_IDS.includes(discipline))firstBad=firstBad||disc;
+if(firstBad){firstBad.focus();return;}
+busy=true;$('#pf-submit',el).disabled=true;
+if(isEdit){const status=$('#pf-status',el).value;Store.updateProject(edit.id,{name,discipline,description,status:PSTAT[status]?status:edit.status});Modal.close();toast(`Project “${name}” updated`);}
+else{const p=Store.createProject({name,discipline,description,template});Modal.close();toast(`Project “${name}” created`);location.hash='#/projects/'+p.id;}});}});}
+function openExperimentForm(opts){opts=opts||{};const edit=opts.experiment?Store.getExperiment(opts.experiment):null;if(opts.experiment&&!edit){toast('This experiment no longer exists.',{type:'info'});return;}
+const v=edit||{title:'',discipline:'physics',projectId:opts.presetProject||null,status:'draft',notes:''};const isEdit=!!edit;
+Modal.open({title:isEdit?'Edit experiment':'New experiment record',body:`<form id="exp-form" novalidate><div class="modal-body">
+<div class="field"><label for="ef-title">Experiment title <span class="mono" data-count-for="ef-title">${v.title.length}/100</span></label>
+<input id="ef-title" type="text" maxlength="100" value="${esc(v.title)}" placeholder="e.g. Damped Oscillation — Run 03" data-counter="100" data-autofocus aria-describedby="ef-title-err" required><p class="field-err" id="ef-title-err" hidden></p></div>
+<div class="form-row"><div class="field"><label for="ef-disc">Discipline</label><select id="ef-disc">${DISCIPLINES.map(d=>`<option value="${d.id}"${v.discipline===d.id?' selected':''}>${esc(d.label)}</option>`).join('')}</select></div>
+<div class="field"><label for="ef-status">Status</label><select id="ef-status">${EXP_STATUSES.map(s=>`<option value="${s.id}"${v.status===s.id?' selected':''}>${s.label}</option>`).join('')}</select></div></div>
+<div class="field"><label for="ef-project">Linked project</label><select id="ef-project">${projectOptionsHTML(v.projectId)}</select></div>
+<div class="field"><label for="ef-notes">Notes <span class="mono" data-count-for="ef-notes">${v.notes.length}/2000</span></label>
+<textarea id="ef-notes" maxlength="2000" data-counter="2000" placeholder="Setup, variables, observations…">${esc(v.notes)}</textarea></div>
+<div class="form-info">${icon('info',14)}<span>This stores an experiment record (metadata + notes). Running simulations will be possible when the lab modules ship.</span></div></div>
+<div class="modal-foot"><button type="button" class="btn btn-secondary" data-action="modal-close">Cancel</button><button type="submit" class="btn btn-primary" id="ef-submit">${icon(isEdit?'check':'plus',14)}${isEdit?'Save Changes':'Create Experiment'}</button></div></form>`,
+onMount(el){let busy=false;$('#exp-form',el).addEventListener('submit',e=>{e.preventDefault();if(busy)return;
+const title=$('#ef-title',el).value.trim();fieldErr('ef-title',!title?'Experiment title is required.':'');if(!title){$('#ef-title',el).focus();return;}
+const discipline=$('#ef-disc',el).value;if(!DISC_IDS.includes(discipline))return;
+busy=true;$('#ef-submit',el).disabled=true;
+const data={title,discipline,status:$('#ef-status',el).value,projectId:$('#ef-project',el).value||null,notes:$('#ef-notes',el).value.trim()};
+if(isEdit){Store.updateExperiment(edit.id,data);Modal.close();toast(`Experiment “${title}” updated`);if(Drawer.isOpen&&Drawer.kind==='experiment'&&Drawer.id===edit.id)openExperimentDrawer(edit.id);}
+else{const ne=Store.createExperiment(data);Modal.close();toast(`Experiment “${title}” recorded`);openExperimentDrawer(ne.id);}});}});}
+function openLibraryForm(opts){opts=opts||{};const edit=opts.item?Store.getLibItem(opts.item):null;if(opts.item&&!edit){toast('This library item no longer exists.',{type:'info'});return;}
+const v=edit||{title:'',category:opts.presetCategory||'note',content:'',projectId:opts.presetProject||null};const isEdit=!!edit;
+Modal.open({title:isEdit?'Edit library item':'New library item',body:`<form id="lib-form" novalidate><div class="modal-body">
+<div class="field"><label for="lf-title">Title <span class="mono" data-count-for="lf-title">${v.title.length}/120</span></label>
+<input id="lf-title" type="text" maxlength="120" value="${esc(v.title)}" placeholder="e.g. Schrödinger equation — time-independent" data-counter="120" data-autofocus aria-describedby="lf-title-err" required><p class="field-err" id="lf-title-err" hidden></p></div>
+<div class="form-row"><div class="field"><label for="lf-cat">Category</label><select id="lf-cat">${LIB_CATEGORIES.map(c=>`<option value="${c.id}"${v.category===c.id?' selected':''}>${esc(c.label)}</option>`).join('')}</select></div>
+<div class="field"><label for="lf-project">Linked project</label><select id="lf-project">${projectOptionsHTML(v.projectId)}</select></div></div>
+<div class="field"><label for="lf-content">Content <span class="mono" data-count-for="lf-content">${v.content.length}/5000</span></label>
+<textarea id="lf-content" maxlength="5000" data-counter="5000" style="min-height:130px" placeholder="Formula text, note body, reference details…">${esc(v.content)}</textarea></div>
+<div class="form-info">${icon('info',14)}<span>Content is stored as plain text. Formula evaluation and rendering arrive with Math Lab.</span></div></div>
+<div class="modal-foot"><button type="button" class="btn btn-secondary" data-action="modal-close">Cancel</button><button type="submit" class="btn btn-primary" id="lf-submit">${icon(isEdit?'check':'plus',14)}${isEdit?'Save Changes':'Save Item'}</button></div></form>`,
+onMount(el){let busy=false;$('#lib-form',el).addEventListener('submit',e=>{e.preventDefault();if(busy)return;
+const title=$('#lf-title',el).value.trim();fieldErr('lf-title',!title?'Title is required.':'');if(!title){$('#lf-title',el).focus();return;}
+const category=$('#lf-cat',el).value;if(!LIBCAT[category])return;
+busy=true;$('#lf-submit',el).disabled=true;
+const data={title,category,content:$('#lf-content',el).value.trim(),projectId:$('#lf-project',el).value||null};
+if(isEdit){Store.updateLibItem(edit.id,data);Modal.close();toast(`“${title}” updated`);if(Drawer.isOpen&&Drawer.kind==='library'&&Drawer.id===edit.id)openLibraryDrawer(edit.id);}
+else{const l=Store.createLibraryItem(data);Modal.close();toast(`“${title}” saved to library`);openLibraryDrawer(l.id);}});}});}
+
+/* ================= DATA I/O ================= */
+function doExport(){const json=Store.exportPayload();const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');const d=new Date();a.href=url;a.download=`simulab-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Backup exported');}
+async function handleImportFile(file){if(!file)return;let raw;
+try{const text=await file.text();raw=JSON.parse(text);}catch(e){Store.notify('error','Import failed','The selected file is not readable JSON.');toast('Import failed — not a valid SIMULAB backup file.',{type:'error'});return;}
+const looksValid=raw&&typeof raw==='object'&&(Array.isArray(raw.projects)||Array.isArray(raw.experiments)||Array.isArray(raw.library));
+if(!looksValid){Store.notify('error','Import failed','The file does not contain SIMULAB record arrays.');toast('Import failed — not a valid SIMULAB backup file.',{type:'error'});return;}
+const{state,dropped}=sanitizeState(raw);
+confirmDialog({title:'Import backup?',message:`Replace current records with <b>${state.projects.length} projects, ${state.experiments.length} experiments, ${state.library.length} library items</b>? Current data will be overwritten. Preferences are kept.${dropped?`<br><br>${dropped} invalid record(s) in the file will be skipped.`:''}`,confirmLabel:'Replace & import',onConfirm(){Store.importPayload(raw);toast('Backup imported');}});}
+function updateList(scope){
+if(scope==='dash-projects'||scope==='page-projects'){updateProjectList(scope);return;}
+if(scope==='page-experiments'){const el=$('[data-list="page-experiments"]');if(!el)return;el.innerHTML=expRowsHTML();const ul=$('ul',el),cnt=$('[data-count="page-experiments"]');if(cnt)cnt.textContent=(ul?ul.dataset.total:0)+' results';return;}
+if(scope==='page-library'){const el=$('[data-list="page-library"]');if(!el)return;el.innerHTML=libGridHTML();const grid=$('.lib-grid',el),cnt=$('[data-count="page-library"]');if(cnt)cnt.textContent=(grid?grid.dataset.total:0)+' results';return;}
+if(scope==='page-activity'){const el=$('[data-list="page-activity"]');if(el)el.innerHTML=activityPageHTML();}}
+
+/* ================= ACTIONS ================= */
+const actions={
+'pref-toggle':el=>{const key=el.dataset.pref;Store.setPref(key,!Store.state.prefs[key]);},
+'open-drawer':()=>openMobileDrawer(),'close-drawer':()=>closeMobileDrawer(),
+'open-search':()=>Search.open(),'search-clear':()=>Search.setQuery(''),
+'search-result':el=>Search.openResult(+el.dataset.idx),
+'search-create-project':()=>{const q=Search.q.trim().slice(0,80);Search.close();openProjectForm({presetName:q});},
+'open-notifications':el=>openNotifications(el),'open-profile':el=>openProfile(el),
+'open-workspace-menu':el=>openWorkspaceMenu(el),'open-quickcreate':el=>openQuickCreate(el),
+'open-about':()=>{Popover.close();openAbout();},
+'row-menu':el=>openRowMenu(el,el.dataset.kind,el.dataset.id),
+'notif-item':el=>{Store.markNotifRead(el.dataset.id);refreshNotifications();},
+'notif-mark-all':()=>{Store.markAllNotifRead();refreshNotifications();},
+'notif-clear':()=>{Store.clearNotifs();refreshNotifications();},
+'new-project':el=>{Popover.close();openProjectForm({presetDiscipline:el.dataset.discipline});},
+'edit-project':el=>{Popover.close();openProjectForm({project:el.dataset.id});},
+'archive-project':el=>{Popover.close();const p=Store.archiveProject(el.dataset.id);if(p)toast(`“${p.name}” archived`,{type:'info',actionLabel:'Undo',onAction(){Store.restoreProject(p.id);toast('Project restored');}});},
+'restore-project':el=>{Popover.close();const p=Store.restoreProject(el.dataset.id);if(p)toast(`“${p.name}” restored`);},
+'delete-project':el=>{Popover.close();const id=el.dataset.id;const p=Store.getProject(id);if(!p)return;
+const expN=Store.state.experiments.filter(e=>e.projectId===id).length;const libN=Store.state.library.filter(l=>l.projectId===id).length;
+const related=(expN||libN)?` ${expN} experiment(s) and ${libN} library item(s) will be <b>kept and unlinked</b>, not deleted.`:' No linked records exist.';
+confirmDialog({title:'Delete project?',message:`<b>“${esc(p.name)}”</b> will be permanently removed from this browser.${related}`,confirmLabel:'Delete project',onConfirm(){const r=parseRoute();if(r.base==='projects'&&r.param===id)location.hash='#/projects';const snap=Store.deleteProject(id);toast(`Project “${p.name}” deleted`,{type:'info',actionLabel:'Undo',onAction(){if(Store.undoDelete(snap))toast('Project restored');}});}});},
+'new-experiment':el=>{Popover.close();openExperimentForm({presetProject:el.dataset.project});},
+'open-experiment':el=>{Popover.close();openExperimentDrawer(el.dataset.id);},
+'edit-experiment':el=>{Popover.close();openExperimentForm({experiment:el.dataset.id});},
+'delete-experiment':el=>{Popover.close();const e=Store.getExperiment(el.dataset.id);if(!e)return;
+confirmDialog({title:'Delete experiment?',message:`<b>“${esc(e.title)}”</b> and its notes will be removed. You can undo right after.`,confirmLabel:'Delete experiment',onConfirm(){if(Drawer.isOpen&&Drawer.kind==='experiment'&&Drawer.id===e.id)Drawer.close();const snap=Store.deleteExperiment(e.id);toast(`Experiment “${e.title}” deleted`,{type:'info',actionLabel:'Undo',onAction(){if(Store.undoDelete(snap))toast('Experiment restored');}});}});},
+'new-library':el=>{Popover.close();openLibraryForm({presetCategory:el.dataset.category,presetProject:el.dataset.project});},
+'open-library':el=>{Popover.close();openLibraryDrawer(el.dataset.id);},
+'edit-library':el=>{Popover.close();openLibraryForm({item:el.dataset.id});},
+'delete-library':el=>{Popover.close();const l=Store.getLibItem(el.dataset.id);if(!l)return;
+confirmDialog({title:'Delete library item?',message:`<b>“${esc(l.title)}”</b> will be removed from your library. You can undo right after.`,confirmLabel:'Delete item',onConfirm(){if(Drawer.isOpen&&Drawer.kind==='library'&&Drawer.id===l.id)Drawer.close();const snap=Store.deleteLibItem(l.id);toast(`“${l.title}” deleted`,{type:'info',actionLabel:'Undo',onAction(){if(Store.undoDelete(snap))toast('Item restored');}});}});},
+'open-workspace':()=>{const c=Store.state.projects.filter(p=>p.status!=='archived'&&p.lastOpenedAt).sort((a,b)=>Date.parse(b.lastOpenedAt)-Date.parse(a.lastOpenedAt));location.hash=c.length?'#/projects/'+c[0].id:'#/projects';},
+'explore-modules':()=>{const m=$('#modules');if(m)m.scrollIntoView({behavior:Store.state.prefs.reduceMotion?'auto':'smooth',block:'start'});},
+'reset-filters':el=>{const scope=el.dataset.scope;ui[scope]=JSON.parse(JSON.stringify(FILTER_DEFAULTS[scope]));renderRoute();},
+'lib-chip':el=>{ui['page-library'].cat=el.dataset.cat;renderRoute();const chip=$(`.chip-btn[data-cat="${el.dataset.cat}"]`);if(chip)chip.focus();},
+'copy-id':el=>{const id=el.dataset.id;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(id).then(()=>toast('ID copied to clipboard')).catch(()=>toast('Copy unavailable — ID: '+id,{type:'info'}));}else toast('Copy unavailable — ID: '+id,{type:'info'});},
+'export-data':()=>{Popover.close();doExport();},
+'import-data':()=>{const f=$('#import-file');if(f)f.click();},
+'reset-workspace':()=>{confirmDialog({title:'Reset workspace?',message:'<b>All projects, experiments, library items, activity and notifications</b> will be permanently deleted from this browser. Preferences are kept. Export a backup first if you need one.',confirmLabel:'Reset everything',onConfirm(){Store.resetWorkspace();toast('Workspace reset',{type:'info'});}});},
+'clear-activity':()=>{confirmDialog({title:'Clear activity history?',message:'The event log will be emptied. Your projects, experiments and library items are not affected.',confirmLabel:'Clear history',onConfirm(){Store.clearActivity();toast('Activity history cleared',{type:'info'});}});},
+'modal-close':()=>Modal.close(),'drawer-close':()=>Drawer.close()
+};
+
+/* ================= SHELL ================= */
+function buildSidebar(){const sb=$('#sidebar');
+sb.innerHTML=`<div class="sb-head"><a class="brand" href="#/dashboard" aria-label="SIMULAB — dashboard">${LOGO_SVG}<span class="brand-text hide-c"><b>SIMULAB</b><i>RESEARCH WORKSPACE</i></span></a>
+<button type="button" class="btn-icon sb-toggle" data-action="pref-toggle" data-pref="sidebarCollapsed" aria-label="Collapse sidebar">${icon('panel-left',16)}</button>
+<button type="button" class="btn-icon sb-close" data-action="close-drawer" aria-label="Close navigation">${icon('x',16)}</button></div>
+<nav class="sb-nav" aria-label="Modules and tools">${NAV_GROUPS.map(g=>`<div class="sb-group-label hide-c">${esc(g.label)}</div>${g.items.map(i=>`<a class="nav-item" href="#/${i.route}" data-route="${i.route}" data-label="${esc(i.label)}">${icon(i.icon,17)}<span class="nav-label hide-c">${esc(i.label)}</span></a>`).join('')}`).join('')}</nav>
+<div class="sb-foot">
+<button type="button" class="nav-item" style="width:100%" data-action="open-notifications" data-label="Notifications" aria-haspopup="dialog" aria-expanded="false">${icon('bell',17)}<span class="nav-label hide-c">Notifications</span><span class="badge" id="sb-bell-badge" hidden></span></button>
+<a class="nav-item" href="#/help" data-route="help" data-label="Help Center">${icon('help',17)}<span class="nav-label hide-c">Help Center</span></a>
+<a class="nav-item" href="#/settings" data-route="settings" data-label="Settings">${icon('settings',17)}<span class="nav-label hide-c">Settings</span></a>
+<button type="button" class="sb-profile" data-action="open-profile" data-label="Local profile" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu"><span class="avatar">${icon('user',15)}</span><span class="sb-profile-text hide-c"><b>Local Profile</b><i>BROWSER WORKSPACE</i></span><span class="hide-c" style="color:var(--text-3)">${icon('chevron-down',13)}</span></button></div>`;}
+function buildTopbar(){$('#topbar').innerHTML=`<div class="tb-left">
+<button type="button" class="btn-icon tb-menu" data-action="open-drawer" aria-label="Open navigation" aria-expanded="false">${icon('menu',18)}</button>
+<div class="tb-context"><div class="tb-crumb mono" id="tb-crumb">SIMULAB / DASHBOARD</div><div class="tb-title" id="tb-title">Dashboard</div></div></div>
+<div class="tb-center"><button type="button" class="tb-search" data-action="open-search" aria-label="Open global search" aria-keyshortcuts="Control+K Meta+K">${icon('search',15)}<span class="tb-search-ph">Search in SIMULAB…</span><kbd class="kbd">${isMac?'⌘ K':'Ctrl K'}</kbd></button>
+<button type="button" class="btn-icon tb-search-icon" data-action="open-search" aria-label="Open global search">${icon('search',17)}</button></div>
+<div class="tb-right"><span class="mem-chip mono" id="tb-mem" hidden data-tip="localStorage unavailable — data is kept in memory for this session only">MEM</span>
+<button type="button" class="tb-ws" data-action="open-workspace-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Workspace selector">${icon('folder',14)}<span class="tb-ws-label" id="tb-ws-label">Research Workspace</span>${icon('chevron-down',13)}</button>
+<button type="button" class="btn btn-primary btn-sm tb-create" data-action="open-quickcreate" aria-haspopup="menu" aria-expanded="false" aria-label="Quick create">${icon('plus',14)}<span class="hide-sm">Create</span></button>
+<button type="button" class="btn-icon" data-action="open-notifications" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" data-tip="Notifications">${icon('bell',17)}<span class="badge" id="tb-bell-badge" hidden></span></button>
+<button type="button" class="tb-avatar" data-action="open-profile" aria-label="Profile menu" aria-haspopup="menu" aria-expanded="false" data-tip="Local profile">${icon('user',16)}</button></div>`;}
+function renderShellBadges(){const unread=Store.state.notifications.filter(n=>!n.read).length;
+['tb-bell-badge','sb-bell-badge'].forEach(id=>{const el=$('#'+id);if(!el)return;el.hidden=unread===0;el.textContent=unread>9?'9+':String(unread);});
+const mem=$('#tb-mem');if(mem)mem.hidden=Store.storageOk;
+$$('[data-action="open-notifications"]').forEach(b=>b.setAttribute('aria-label',unread?`Notifications, ${unread} unread`:'Notifications'));}
+function updateSidebarTips(){const collapsed=$('#app').classList.contains('sb-collapsed')&&innerWidth>1023;
+$$('#sidebar [data-label]').forEach(el=>{if(collapsed)el.setAttribute('data-tip',el.dataset.label);else el.removeAttribute('data-tip');});
+const t=$('.sb-toggle');if(t){const isC=Store.state.prefs.sidebarCollapsed;t.setAttribute('aria-label',isC?'Expand sidebar':'Collapse sidebar');t.setAttribute('data-tip',isC?'Expand sidebar':'Collapse sidebar');}}
+function applyPrefs(){const p=Store.state.prefs;$('#app').classList.toggle('sb-collapsed',!!p.sidebarCollapsed);document.documentElement.classList.toggle('reduce-motion',!!p.reduceMotion);updateSidebarTips();}
+function setActiveNav(base){$$('#sidebar a[data-route]').forEach(a=>{const on=a.dataset.route===base;a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});}
+function openMobileDrawer(){const app=$('#app');if(app.classList.contains('drawer-open'))return;app.classList.add('drawer-open');const scrim=$('#scrim');scrim.hidden=false;requestAnimationFrame(()=>scrim.classList.add('show'));lockScroll();$('.tb-menu').setAttribute('aria-expanded','true');$('#sidebar').setAttribute('role','dialog');$('#sidebar').setAttribute('aria-modal','true');const first=$('#sidebar a, #sidebar button');if(first)first.focus();}
+function closeMobileDrawer(){const app=$('#app');if(!app.classList.contains('drawer-open'))return;app.classList.remove('drawer-open');const scrim=$('#scrim');scrim.classList.remove('show');setTimeout(()=>{if(!app.classList.contains('drawer-open'))scrim.hidden=true;},200);unlockScroll();const menu=$('.tb-menu');menu.setAttribute('aria-expanded','false');$('#sidebar').removeAttribute('role');$('#sidebar').removeAttribute('aria-modal');if(innerWidth<=1023)menu.focus();}
+function closeAllOverlays(){Popover.close();Search.close();Modal.close();Drawer.close();closeMobileDrawer();Tooltip.hide();}
+
+/* ================= ROUTER ================= */
+function parseRoute(){const raw=(location.hash||'#/dashboard').replace(/^#\/?/,'');const parts=raw.split('/').filter(Boolean);return {base:parts[0]||'dashboard',param:parts[1]||null,raw};}
+const CORE_ROUTES={dashboard:{title:'Dashboard',view:DashboardView},projects:{title:'Projects',view:ProjectsView},experiments:{title:'Experiments',view:ExperimentsView},library:{title:'Library',view:LibraryView},activity:{title:'Activity',view:ActivityView},settings:{title:'Settings',view:SettingsView},help:{title:'Help Center',view:HelpView}};
+function renderRoute(opts){opts=opts||{};const r=parseRoute();let title,html,crumbExtra='';
+if(r.base==='projects'&&r.param){const p=Store.getProject(r.param);if(p)Store.touchOpen(r.param);title=p?p.name:'Project not found';crumbExtra='PROJECTS / ';html=ProjectDetailView(r.param);}
+else if(CORE_ROUTES[r.base]&&!r.param){title=CORE_ROUTES[r.base].title;html=CORE_ROUTES[r.base].view();}
+else if(DEST[r.base]&&!r.param){title=DEST[r.base].name;html=PlaceholderView(DEST[r.base]);}
+else{title='Not found';html=NotFoundView(r.raw);}
+$('#main').innerHTML=html;document.title=title+' — SIMULAB';
+const crumb=$('#tb-crumb'),tt=$('#tb-title'),ws=$('#tb-ws-label');
+if(crumb)crumb.textContent=('SIMULAB / '+crumbExtra+title).toUpperCase();
+if(tt)tt.textContent=title;
+if(ws){if(r.base==='projects'&&r.param){const p=Store.getProject(r.param);ws.textContent=p?p.name:'Research Workspace';}else ws.textContent='Research Workspace';}
+setActiveNav(r.base);renderShellBadges();
+if(opts.focus){window.scrollTo(0,0);$('#main').focus({preventScroll:true});}}
+
+/* ================= INIT ================= */
+function bindGlobal(){
+document.addEventListener('click',e=>{
+const link=e.target.closest('a[href^="#/"]');
+if(link){Popover.close();closeMobileDrawer();if(Modal.isOpen)Modal.close();if(Drawer.isOpen)Drawer.close();}
+const t=e.target.closest('[data-action]');
+if(t&&actions[t.dataset.action]){if(t.tagName==='A'||t.getAttribute('role')==='button')e.preventDefault();actions[t.dataset.action](t,e);}
+});
+document.addEventListener('keydown',e=>{
+if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(Search.isOpen)Search.close();else if(!Modal.isOpen&&!Drawer.isOpen)Search.open();return;}
+if(e.key==='Escape'){if(Search.isOpen){Search.close();return;}if(Modal.isOpen){Modal.close();return;}if(Drawer.isOpen){Drawer.close();return;}if(Popover.el){Popover.close(true);return;}if($('#app').classList.contains('drawer-open')){closeMobileDrawer();return;}}
+if(e.key==='Tab'){if(Search.isOpen&&Search.panel)trapTab(Search.panel,e);else if(Modal.isOpen&&Modal.el)trapTab(Modal.el,e);else if(Drawer.isOpen&&Drawer.el)trapTab(Drawer.el,e);else if($('#app').classList.contains('drawer-open'))trapTab($('#sidebar'),e);}
+if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.lib-card[role="button"]')){e.preventDefault();openLibraryDrawer(e.target.dataset.id);}
+});
+document.addEventListener('input',e=>{
+const f=e.target.closest('input[data-filter]');if(f){ui[f.dataset.scope][f.dataset.filter]=f.value;updateList(f.dataset.scope);return;}
+const c=e.target.closest('[data-counter]');if(c){const out=$(`[data-count-for="${c.id}"]`);if(out)out.textContent=c.value.length+'/'+c.dataset.counter;}
+});
+document.addEventListener('change',e=>{
+const f=e.target.closest('select[data-filter]');if(f){ui[f.dataset.scope][f.dataset.filter]=f.value;updateList(f.dataset.scope);return;}
+const pc=e.target.closest('[data-pref-change]');if(pc){Store.setPref(pc.dataset.prefChange,pc.value);return;}
+const cs=e.target.closest('[data-change="project-status"]');if(cs){const p=Store.setProjectStatus(cs.dataset.id,cs.value);if(p)toast(`Status set to ${PSTAT[p.status].label}`);return;}
+if(e.target.id==='import-file'){handleImportFile(e.target.files&&e.target.files[0]);e.target.value='';}
+});
+window.addEventListener('hashchange',()=>{closeAllOverlays();renderRoute({focus:true});});
+window.addEventListener('resize',()=>{Popover.close();Tooltip.hide();if(innerWidth>1023)closeMobileDrawer();updateSidebarTips();});
+window.addEventListener('storage',e=>{if(e.key!==DB_KEY||e.newValue==null)return;try{const{state}=sanitizeState(JSON.parse(e.newValue));Store.state=state;applyPrefs();renderShellBadges();renderRoute();}catch(err){}});
+$('#scrim').addEventListener('pointerdown',closeMobileDrawer);
+document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const t=e.target.closest('[data-tip]');if(t&&!t.contains(e.relatedTarget))Tooltip.schedule(t);});
+document.addEventListener('pointerout',e=>{const t=e.target.closest('[data-tip]');if(t&&!t.contains(e.relatedTarget))Tooltip.hide();});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t)Tooltip.show(t);});
+document.addEventListener('focusout',()=>Tooltip.hide());
+document.addEventListener('click',()=>Tooltip.hide(),true);
+window.addEventListener('scroll',()=>Tooltip.hide(),true);
+setInterval(()=>{$$('time[datetime]').forEach(t=>{t.textContent=timeLabel(t.getAttribute('datetime'));});},45000);
+}
+function init(){Tooltip.init();Store.load();buildSidebar();buildTopbar();applyPrefs();bindGlobal();
+if(!location.hash){try{history.replaceState(null,'','#/dashboard');}catch(e){location.hash='#/dashboard';}}
+renderRoute();Store.save();}
+init();
+</script>
+</body>
+</html>
